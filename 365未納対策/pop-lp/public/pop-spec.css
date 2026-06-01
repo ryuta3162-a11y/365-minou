@@ -1,0 +1,685 @@
+/**
+ * FIT365 3スライドLP（クライアント提供用ビジュアル）
+ * 画像: public/assets/lp/slide-01-pop.png 〜 slide-03-kiosk.png
+ */
+:root {
+  --lp-bg: #e8eab0;
+  --lp-card: #ffffff;
+  --lp-text: #1a1a1a;
+  --lp-muted: #555;
+  --lp-accent: #c2185b;
+  --lp-nav-bg: rgba(255, 255, 255, 0.97);
+  --lp-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --lp-radius: 12px;
+  --lp-max: 28rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body.pop-lp-body {
+  margin: 0;
+  font-family: "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  background: var(--lp-bg);
+  color: var(--lp-text);
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 300;
+  padding: 0.5rem 1rem;
+  background: #000;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 0 0 6px 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+.lang-float {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.55rem;
+  background: var(--lp-nav-bg);
+  border-radius: 10px;
+  box-shadow: var(--lp-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.lang-float label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--lp-muted);
+  white-space: nowrap;
+}
+
+.lang-float select {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  min-width: 7rem;
+  max-width: 40vw;
+  background: #fff;
+  cursor: pointer;
+}
+
+.lp-toc {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.5rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--lp-nav-bg);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.lp-toc a {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--lp-accent);
+  text-decoration: none;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(194, 24, 91, 0.08);
+  border: 1px solid rgba(194, 24, 91, 0.2);
+}
+
+.lp-toc a:hover,
+.lp-toc a:focus-visible {
+  background: rgba(194, 24, 91, 0.15);
+  outline: none;
+}
+
+.lp-main {
+  max-width: calc(var(--lp-max) + 2rem);
+  margin: 0 auto;
+  padding: 0.75rem 0.75rem 2.5rem;
+}
+
+.lp-lang-note {
+  margin: 3.25rem 0 0.85rem;
+  padding: 0.55rem 0.65rem;
+  padding-right: clamp(0.65rem, 30vw, 13.5rem);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #5d4037;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+}
+
+.lp-lang-note[hidden] {
+  display: none !important;
+}
+
+.lp-slide {
+  margin-bottom: 1.25rem;
+}
+
+.lp-slide:last-of-type {
+  margin-bottom: 0;
+}
+
+.lp-slide__card {
+  background: var(--lp-card);
+  border-radius: var(--lp-radius);
+  box-shadow: var(--lp-shadow);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* index: Canva 1–2 から guide.html への導線 */
+.lp-guide-cta-card {
+  padding: 1rem 1rem 1.15rem;
+}
+
+.lp-guide-cta {
+  text-align: center;
+}
+
+.lp-guide-cta__badge {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--lp-muted);
+  letter-spacing: 0.02em;
+}
+
+.lp-guide-cta__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--lp-text);
+}
+
+.lp-guide-cta__lead {
+  margin: 0 0 1rem;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--lp-muted);
+  text-align: left;
+}
+
+.lp-guide-cta__btn {
+  display: inline-block;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--lp-accent);
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(194, 24, 91, 0.35);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.lp-guide-cta__btn:hover,
+.lp-guide-cta__btn:focus-visible {
+  filter: brightness(1.05);
+  outline: 2px solid var(--lp-accent);
+  outline-offset: 2px;
+}
+
+/* 透過PNG + テキスト重ね: 位置は % で調整（Canvaの穴あきに合わせる） */
+.lp-slide__stack {
+  position: relative;
+}
+
+.lp-slide__img {
+  width: 100%;
+  height: auto;
+  display: block;
+  vertical-align: top;
+}
+
+.lp-slide__overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  line-height: 1.4;
+}
+
+.lp-slide__overlay * {
+  pointer-events: auto;
+}
+
+/* --- スライド1（POP）重ね位置・余白: 画像差し替え後に数値だけ触る --- */
+.lp-slide__overlay--s1 {
+  --ov-red: #b22222;
+  --ov-pink: #ef72b6;
+  --s1-top-y: 28.1%;
+  --s1-top-h: 11.2%;
+  --s1-alert-y: 40.8%;
+  --s1-alert-h: 9.2%;
+  --s1-pill-left-y: 40.4%;
+  --s1-pill-right-y: 40.4%;
+  --s1-bottom-y: 75.8%;
+  --s1-bottom-h: 20.4%;
+  --s1-side-pad: 4.8%;
+}
+
+.lp-s1-topbox,
+.lp-s1-alert,
+.lp-s1-bottombox,
+.lp-s1-pill {
+  position: absolute;
+  left: var(--s1-side-pad);
+  right: var(--s1-side-pad);
+}
+
+.lp-s1-topbox {
+  top: var(--s1-top-y);
+  height: var(--s1-top-h);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.lp-s1-title {
+  margin: 0;
+  font-weight: 800;
+  color: var(--ov-red);
+  font-size: clamp(0.94rem, 3.05vw, 1.2rem);
+  line-height: 1.25;
+}
+
+.lp-s1-member {
+  margin: 0.2em 0 0;
+  font-weight: 800;
+  color: #2d2d2d;
+  font-size: clamp(0.63rem, 2.1vw, 0.8rem);
+  line-height: 1.2;
+}
+
+.lp-s1-alert {
+  top: var(--s1-alert-y);
+  height: var(--s1-alert-h);
+  margin: 0;
+  padding: 0.26em 0.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 800;
+  color: var(--ov-red);
+  background: transparent;
+  font-size: clamp(0.8rem, 2.5vw, 1.02rem);
+  line-height: 1.25;
+}
+
+.lp-s1-pill {
+  width: 29%;
+  height: 4.2%;
+  left: auto;
+  right: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 0;
+  font-weight: 800;
+  background: transparent;
+  color: #3f2b36;
+  font-size: clamp(0.68rem, 2.05vw, 0.86rem);
+  line-height: 1.2;
+}
+
+.lp-s1-pill--left {
+  left: 3.8%;
+  top: var(--s1-pill-left-y);
+}
+
+.lp-s1-pill--middle {
+  left: 35.6%;
+  top: var(--s1-pill-left-y);
+}
+
+.lp-s1-pill--right {
+  right: 3.8%;
+  top: var(--s1-pill-right-y);
+}
+
+.lp-s1-bottombox {
+  top: var(--s1-bottom-y);
+  height: var(--s1-bottom-h);
+  margin: 0;
+  padding: 1.5% 5% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25em;
+  font-size: clamp(0.62rem, 1.95vw, 0.8rem);
+}
+
+.lp-s1-payline {
+  margin: 0;
+  padding: 0.2em 0.25em;
+  text-align: center;
+  font-weight: 800;
+  background: transparent;
+  color: var(--lp-text);
+  font-size: 1em;
+  line-height: 1.35;
+}
+
+.lp-s1-payline .pay-name {
+  color: var(--ov-red);
+}
+
+.lp-s1-subnote {
+  margin: 0.02em 0 0;
+  text-align: center;
+  font-weight: 700;
+  color: #2c2c2c;
+  font-size: 0.8em;
+  line-height: 1.2;
+}
+
+.lp-s1-notes-h {
+  margin: 0.18em 0 0;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.98em;
+  line-height: 1.2;
+}
+
+.lp-s1-ul {
+  margin: 0;
+  padding-left: 1.1em;
+  font-weight: 700;
+  font-size: 0.88em;
+  line-height: 1.2;
+}
+
+.lp-s1-ul li {
+  margin: 0.08em 0;
+}
+
+/* --- スライド2・3: 上部の空欄へ見出し、下部へ短文 --- */
+.lp-slide__overlay--s2,
+.lp-slide__overlay--s3 {
+  font-size: clamp(0.66rem, 2.5vw, 0.9rem);
+}
+
+.lp-s2-topbox,
+.lp-s3-topbox {
+  position: absolute;
+  left: 5.5%;
+  right: 5.5%;
+  top: 3.8%;
+  height: 9.2%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.lp-s2-title,
+.lp-s3-title {
+  margin: 0;
+  font-weight: 800;
+  color: #6b5d2e;
+  font-size: clamp(0.86rem, 2.75vw, 1.08rem);
+  line-height: 1.25;
+}
+
+.lp-s2-foot,
+.lp-s3-foot {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 8.2%;
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  color: #6b5d2e;
+  font-size: clamp(0.7rem, 2.05vw, 0.86rem);
+  line-height: 1.35;
+}
+
+.lp-s2-foot {
+  display: block;
+}
+
+.lp-s3-foot {
+  bottom: 2.6%;
+  left: 8%;
+  right: 8%;
+}
+
+/* --- スライド2: 見本レイアウトに合わせる --- */
+.lp-s2-topbox {
+  top: 4.4%;
+  height: 9.4%;
+  left: 6%;
+  right: 6%;
+}
+
+.lp-s2-title {
+  color: #2a2a2a;
+  font-size: clamp(0.98rem, 3.2vw, 1.56rem);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.lp-s2-sub {
+  position: absolute;
+  left: 7.5%;
+  right: 7.5%;
+  top: 15.2%;
+  margin: 0;
+  text-align: left;
+  font-weight: 800;
+  color: #333;
+  font-size: clamp(0.63rem, 1.9vw, 0.86rem);
+  line-height: 1.3;
+}
+
+.lp-s2-foot {
+  left: 8%;
+  right: 8%;
+  bottom: 2.6%;
+  text-align: center;
+  color: #222;
+  font-weight: 800;
+  font-size: clamp(0.75rem, 2.2vw, 0.98rem);
+  line-height: 1.28;
+}
+
+/* --- スライド3: 見本レイアウトに合わせる --- */
+.lp-s3-topbox {
+  top: 3.6%;
+  height: 9.4%;
+  left: 6%;
+  right: 6%;
+}
+
+.lp-s3-title {
+  color: #2a2a2a;
+  font-size: clamp(0.98rem, 3.2vw, 1.56rem);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.lp-s3-sub {
+  position: absolute;
+  left: 7.5%;
+  right: 7.5%;
+  top: 14.6%;
+  margin: 0;
+  text-align: left;
+  font-weight: 800;
+  color: #333;
+  font-size: clamp(0.63rem, 1.9vw, 0.86rem);
+  line-height: 1.3;
+}
+
+.lp-s3-foot {
+  left: 8%;
+  right: 8%;
+  bottom: 5.6%;
+  text-align: center;
+  color: #222;
+  font-weight: 800;
+  font-size: clamp(0.75rem, 2.2vw, 0.98rem);
+  line-height: 1.28;
+}
+
+/* 旧調整スタイル（透過版で未使用） */
+.lp-s1-cols,
+.lp-s1-sms1,
+.lp-s1-sms2,
+.lp-s1-sms3,
+.lp-s1-sms4,
+.lp-s1-alt {
+  display: none;
+}
+
+.lp-slide__fig {
+  margin: 0;
+  line-height: 0;
+}
+
+.lp-slide__caption {
+  padding: 0.5rem 0.65rem 0.65rem;
+  font-size: 0.72rem;
+  color: var(--lp-muted);
+  line-height: 1.45;
+  border-top: 1px solid #eee;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lp-footer-note {
+  margin: 1.5rem 0 0;
+  padding: 0.75rem;
+  font-size: 0.72rem;
+  color: var(--lp-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* 要望対応: ナビのみ非表示、言語切替は右上に表示 */
+.lp-toc {
+  display: none !important;
+}
+
+/* --- LP3 guide.html: 言語ごとに完成 PNG を差し替え（HTML オーバーレイ・白マスクなし） --- */
+
+/* lp-3-6.html translation overlays */
+.lp-slide__overlay--lp36a,
+.lp-slide__overlay--lp36b {
+  color: #222;
+  font-size: clamp(0.66rem, 2.15vw, 0.92rem);
+}
+
+.lp36a-title,
+.lp36a-lead,
+.lp36a-foot,
+.lp36b-title,
+.lp36b-sub,
+.lp36b-foot {
+  position: absolute;
+  margin: 0;
+  text-align: center;
+}
+
+.lp36a-title {
+  left: 9%;
+  right: 9%;
+  top: 34.2%;
+  font-weight: 800;
+  color: #b71c1c;
+  font-size: clamp(0.84rem, 2.65vw, 1.18rem);
+  line-height: 1.25;
+}
+
+.lp36a-lead {
+  left: 10%;
+  right: 10%;
+  top: 41.6%;
+  font-weight: 800;
+  color: #222;
+  font-size: clamp(0.58rem, 1.72vw, 0.8rem);
+  line-height: 1.3;
+}
+
+.lp36a-foot {
+  left: 16%;
+  right: 16%;
+  top: 79.2%;
+  font-weight: 800;
+  color: #7a6515;
+  font-size: clamp(0.76rem, 2.35vw, 1.02rem);
+  line-height: 1.25;
+}
+
+.lp36b-title {
+  left: 6%;
+  right: 6%;
+  top: 4.2%;
+  font-weight: 800;
+  color: #2d2d2d;
+  font-size: clamp(1.02rem, 3.2vw, 1.56rem);
+  line-height: 1.2;
+}
+
+.lp36b-sub {
+  left: 8%;
+  right: 8%;
+  top: 14.4%;
+  font-weight: 800;
+  color: #2d2d2d;
+  font-size: clamp(0.7rem, 2.1vw, 0.96rem);
+  line-height: 1.3;
+}
+
+.lp36b-foot {
+  left: 8%;
+  right: 8%;
+  bottom: 6.2%;
+  font-weight: 800;
+  color: #2d2d2d;
+  font-size: clamp(0.82rem, 2.5vw, 1.18rem);
+  line-height: 1.25;
+}
+
+/* lp-3-6: non-Japanese text tends to be longer, so tighten layout */
+html[lang="en"] .lp36a-title,
+html[lang="zh-Hans"] .lp36a-title,
+html[lang="zh-Hant"] .lp36a-title,
+html[lang="ko"] .lp36a-title {
+  top: 33.8%;
+  left: 8%;
+  right: 8%;
+  font-size: clamp(0.74rem, 2.1vw, 0.98rem);
+  line-height: 1.2;
+}
+
+html[lang="en"] .lp36a-lead,
+html[lang="zh-Hans"] .lp36a-lead,
+html[lang="zh-Hant"] .lp36a-lead,
+html[lang="ko"] .lp36a-lead {
+  top: 41.2%;
+  left: 8%;
+  right: 8%;
+  font-size: clamp(0.5rem, 1.45vw, 0.68rem);
+  line-height: 1.16;
+}
+
+html[lang="en"] .lp36a-foot,
+html[lang="zh-Hans"] .lp36a-foot,
+html[lang="zh-Hant"] .lp36a-foot,
+html[lang="ko"] .lp36a-foot {
+  top: 79.5%;
+  left: 14%;
+  right: 14%;
+  font-size: clamp(0.68rem, 1.95vw, 0.9rem);
+  line-height: 1.2;
+}

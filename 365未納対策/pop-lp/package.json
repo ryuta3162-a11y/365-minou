@@ -1,0 +1,12 @@
+{
+  "name": "fit365-pop-lp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIT365 多言語POP（Vercel 静的ホスティング）",
+  "scripts": {
+    "build": "echo Static site - no build step",
+    "preview": "npx --yes serve public",
+    "deploy": "npx vercel",
+    "deploy:prod": "npx vercel --prod"
+  }
+}

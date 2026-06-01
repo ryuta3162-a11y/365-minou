@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="FIT365 月会費未納のお知らせ・FIT365アプリからのお支払い方法のご案内（多言語メニュー付き）。" />
+  <meta name="theme-color" content="#e8eab0" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://fit365-pop-lp.vercel.app/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="FIT365" />
+  <meta property="og:description" content="" />
+  <meta property="og:url" content="https://fit365-pop-lp.vercel.app/" />
+  <meta property="og:image" content="https://fit365-pop-lp.vercel.app/assets/lp/slide-pop-03-06-app-kiosk-ja.png" />
+  <title>FIT365</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="pop-spec.css" />
+</head>
+<body class="pop-lp-body">
+  <a class="skip-link" href="#main" data-k="lpSkip">本文へスキップ</a>
+
+  <div class="lang-float">
+    <label for="lang" id="langLabel">Language / 言語</label>
+    <select id="lang" aria-labelledby="langLabel"></select>
+  </div>
+
+  <nav class="lp-toc" aria-label="スライド内ナビゲーション">
+    <a href="#lp-1-2" data-k="lpNav1"></a>
+    <a href="#lp-3-6" data-k="lpNav2"></a>
+    <a href="#lp-10" data-k="lpNav10"></a>
+  </nav>
+
+  <main id="main" class="lp-main">
+    <p id="langVisualNote" class="lp-lang-note" role="status" hidden data-k="lpVisualLangNote"></p>
+
+    <!-- Canva 1–2：請求・クレジットカード変更 → guide.html（多言語ラスタ） -->
+    <section id="lp-1-2" class="lp-slide" aria-labelledby="lp-1-2-title">
+      <h2 id="lp-1-2-title" class="sr-only" data-k="lpNav1"></h2>
+      <div class="lp-slide__card lp-guide-cta-card">
+        <div class="lp-guide-cta">
+          <p class="lp-guide-cta__badge" data-k="lpBlock12Badge"></p>
+          <h3 class="lp-guide-cta__title" data-k="lpBlock12Title"></h3>
+          <p class="lp-guide-cta__lead" data-k="lpBlock12Lead"></p>
+          <a class="lp-guide-cta__btn" href="guide.html" data-k="lpBlock12Cta"></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Canva 3–6：アプリ・キオスク端末からの手続き可能店舗向け案内（現状は日本語1枚） -->
+    <section id="lp-3-6" class="lp-slide" aria-labelledby="lp-3-6-title">
+      <h2 id="lp-3-6-title" class="sr-only" data-k="lpNav2"></h2>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig">
+          <img
+            class="lp-slide__img"
+            src="assets/lp/slide-pop-03-06-app-kiosk-ja.png"
+            decoding="async"
+            fetchpriority="high"
+            alt=""
+            data-alt-key="lpSlide306Alt"
+          />
+        </figure>
+      </div>
+    </section>
+
+    <!-- Canva 10：最終通告（日本語ラスタ） -->
+    <section id="lp-10" class="lp-slide" aria-labelledby="lp-10-title">
+      <h2 id="lp-10-title" class="sr-only" data-k="lpNav10"></h2>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig">
+          <img
+            class="lp-slide__img"
+            src="assets/lp/slide-pop-10-final-notice-ja.png"
+            loading="lazy"
+            decoding="async"
+            alt=""
+            data-alt-key="lpSlide10Alt"
+          />
+        </figure>
+      </div>
+    </section>
+
+    <p class="lp-footer-note" data-k="lpClientFooter"></p>
+  </main>
+
+  <script>
+    (function () {
+      var LANGS = [
+        { code: "ja", file: "ja.json", label: "日本語" },
+        { code: "en", file: "en.json", label: "English" },
+        { code: "zh-Hans", file: "zh-Hans.json", label: "简体中文" },
+        { code: "zh-Hant", file: "zh-Hant.json", label: "繁體中文" },
+        { code: "ko", file: "ko.json", label: "한국어" }
+      ];
+
+      var keys = [
+        "lpSkip", "lpNav1", "lpNav2", "lpNav10",
+        "lpVisualLangNote", "lpClientFooter",
+        "lpBlock12Badge", "lpBlock12Title", "lpBlock12Lead", "lpBlock12Cta"
+      ];
+
+      var htmlKeys = [];
+
+      var altKeys = ["lpSlide306Alt", "lpSlide10Alt"];
+
+      var sel = document.getElementById("lang");
+      var langNote = document.getElementById("langVisualNote");
+
+      var linkCanon = document.querySelector('link[rel="canonical"]');
+      var metaOgUrl = document.querySelector('meta[property="og:url"]');
+      var metaOgImage = document.querySelector('meta[property="og:image"]');
+      if (linkCanon) linkCanon.setAttribute("href", location.origin + "/");
+      if (metaOgUrl) metaOgUrl.setAttribute("content", location.origin + "/");
+      if (metaOgImage) metaOgImage.setAttribute("content", location.origin + "/assets/lp/slide-pop-03-06-app-kiosk-ja.png");
+
+      LANGS.forEach(function (L) {
+        var opt = document.createElement("option");
+        opt.value = L.code;
+        opt.textContent = L.label;
+        sel.appendChild(opt);
+      });
+
+      function applyStrings(data) {
+        document.title = data.metaTitle || "FIT365";
+        keys.forEach(function (k) {
+          document.querySelectorAll("[data-k=\"" + k + "\"]").forEach(function (el) {
+            var v = data[k] != null ? data[k] : "";
+            el.textContent = v;
+          });
+        });
+        htmlKeys.forEach(function (k) {
+          document.querySelectorAll("[data-k-html=\"" + k + "\"]").forEach(function (el) {
+            var v = data[k] != null ? data[k] : "";
+            el.innerHTML = v;
+          });
+        });
+        altKeys.forEach(function (k) {
+          var t = data[k] != null ? data[k] : "";
+          document.querySelectorAll("[data-alt-key=\"" + k + "\"]").forEach(function (img) {
+            img.alt = t;
+          });
+        });
+        document.documentElement.lang = sel.value;
+        if (langNote) {
+          var nv = data.lpVisualLangNote != null ? data.lpVisualLangNote : "";
+          if (nv) {
+            langNote.hidden = false;
+            langNote.textContent = nv;
+          } else {
+            langNote.hidden = true;
+            langNote.textContent = "";
+          }
+        }
+        var ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute("content", document.title);
+        var ogDesc = document.querySelector('meta[property="og:description"]');
+        var desc = data.lpOgDescription || data.metaTitle || "";
+        if (ogDesc && desc) ogDesc.setAttribute("content", desc);
+        var metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc && desc) metaDesc.setAttribute("content", desc);
+      }
+
+      function loadLang(code) {
+        var item = LANGS.find(function (L) { return L.code === code; }) || LANGS[0];
+        return fetch("i18n/" + item.file)
+          .then(function (r) {
+            if (!r.ok) throw new Error("fetch " + item.file);
+            return r.json();
+          })
+          .then(applyStrings)
+          .catch(function () {
+            if (code !== "ja") return loadLang("ja");
+            applyStrings({});
+          });
+      }
+
+      var stored = null;
+      try { stored = localStorage.getItem("popViewerLang"); } catch (e) {}
+      if (stored && LANGS.some(function (L) { return L.code === stored; })) sel.value = stored;
+      sel.addEventListener("change", function () {
+        try { localStorage.setItem("popViewerLang", sel.value); } catch (e) {}
+        loadLang(sel.value);
+      });
+
+      loadLang(sel.value);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <!-- CSVパース用のライブラリ PapaParse を読み込み -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: 'Meiryo', sans-serif;
+      padding: 15px;
+      color: #333;
+      background-color: #f9f9f9;
+    }
+    h3 {
+      color: #e91e63;
+      font-size: 18px;
+      margin-top: 0;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #fce4ec;
+      padding-bottom: 5px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #555;
+    }
+    .note {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 10px;
+      display: block;
+    }
+    input[type="file"], select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      background-color: #e91e63;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #c2185b;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      min-height: 20px;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid rgba(233,30,99,0.3);
+      border-radius: 50%;
+      border-top-color: #e91e63;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <h3>未納者データの自動生成</h3>
+
+  <div class="form-group">
+    <label for="targetSheet">書き込み対象のシート</label>
+    <select id="targetSheet">
+      <option value="">読込中...</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="csvTransfer">1. 振替結果一覧表 (CSV)</label>
+    <span class="note">※会員の退会状況やセキュリティ費の有無を判定します</span>
+    <input type="file" id="csvTransfer" accept=".csv">
+  </div>
+
+  <div class="form-group">
+    <label for="csvMember">2. 条件別会員リスト (CSV)</label>
+    <span class="note">※電話番号とメールアドレスを抽出します</span>
+    <input type="file" id="csvMember" accept=".csv">
+  </div>
+
+  <button id="runBtn" onclick="processFiles()">データを生成して入力</button>
+  
+  <div id="status"></div>
+
+  <script>
+    /** メニュー実行時点のアクティブシートと一覧（createTemplateFromFile で埋め込み） */
+    var FIT365_SHEET_NAMES = <?!= sheetNamesJson ?>;
+    var FIT365_ACTIVE_SHEET = <?!= activeSheetNameJson ?>;
+
+    function fillTargetSheetSelect(names, activeName) {
+      const select = document.getElementById('targetSheet');
+      select.innerHTML = '';
+      if (!names || !names.length) {
+        select.innerHTML = '<option value="">シートがありません</option>';
+        return;
+      }
+      var active = activeName || '';
+      var ordered = names.slice();
+      var ai = ordered.indexOf(active);
+      if (ai > 0) {
+        ordered.splice(ai, 1);
+        ordered.unshift(active);
+      }
+      ordered.forEach(function(name) {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+      if (active && ordered.indexOf(active) !== -1) {
+        select.value = active;
+      }
+    }
+
+    // 画面ロード時: 埋め込み一覧があれば即反映（メニュー押下時のアクティブシートを選択）
+    window.onload = function() {
+      if (typeof FIT365_SHEET_NAMES !== 'undefined' && FIT365_SHEET_NAMES && FIT365_SHEET_NAMES.length) {
+        fillTargetSheetSelect(FIT365_SHEET_NAMES, FIT365_ACTIVE_SHEET);
+        return;
+      }
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(sheetInfo) {
+            fillTargetSheetSelect(sheetInfo.allSheets || [], sheetInfo.activeSheet);
+          })
+          .withFailureHandler(function(error) {
+            showStatus("シート名の取得に失敗しました: " + error.message, "#d93025");
+          })
+          .getSheetInfo();
+      } else {
+        const select = document.getElementById('targetSheet');
+        select.innerHTML = '<option value="プレビュー用シート">プレビュー用シート</option>';
+        showStatus("GASプレビュー環境のためモックデータを表示しています", "#555");
+      }
+    };
+
+    function showStatus(message, color, isLoading = false) {
+      const statusDiv = document.getElementById('status');
+      statusDiv.style.color = color;
+      if (isLoading) {
+        statusDiv.innerHTML = '<span class="loading-spinner"></span>' + message;
+      } else {
+        statusDiv.innerText = message;
+      }
+    }
+
+    // CSVファイルを読み込んで2次元配列に変換するPromise関数
+    function readCsvAsArray(file) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          encoding: "Shift-JIS", // 業務システムから出力されたCSVはShift-JISが多いと想定（必要に応じて"UTF-8"に変更）
+          complete: function(results) {
+            resolve(results.data);
+          },
+          error: function(err) {
+            reject(err);
+          }
+        });
+      });
+    }
+
+    async function processFiles() {
+      const btn = document.getElementById('runBtn');
+      const targetSheet = document.getElementById('targetSheet').value;
+      const fileTransfer = document.getElementById('csvTransfer').files[0];
+      const fileMember = document.getElementById('csvMember').files[0];
+
+      if (!targetSheet) {
+        showStatus("対象シートが選択されていません。", "#d93025");
+        return;
+      }
+      if (!fileTransfer || !fileMember) {
+        showStatus("2つのCSVファイルを両方とも選択してください。", "#d93025");
+        return;
+      }
+
+      btn.disabled = true;
+      showStatus("CSVを読み込み中...", "#f4b400", true);
+
+      try {
+        // フロントエンドでCSVを2次元配列に変換
+        const csvTransferData = await readCsvAsArray(fileTransfer);
+        const csvMemberData = await readCsvAsArray(fileMember);
+
+        showStatus("スプレッドシートへ書き込み中...", "#f4b400", true);
+
+        // GAS側の処理を呼び出し
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(function(count) {
+              showStatus(`✅ 処理完了！ ${count}件のデータを入力しました。`, "#0f9d58");
+              setTimeout(() => google.script.host.close(), 2500); // 2.5秒後に閉じる
+            })
+            .withFailureHandler(function(error) {
+              btn.disabled = false;
+              showStatus("エラーが発生しました: " + error.message, "#d93025");
+            })
+            .processFit365Data(csvTransferData, csvMemberData, targetSheet);
+        } else {
+          // GASプレビュー環境用のフォールバック処理
+          setTimeout(function() {
+            showStatus(`✅ 処理完了！ (プレビュー環境のためGAS連携はスキップされました)`, "#0f9d58");
+            btn.disabled = false;
+          }, 1500);
+        }
+
+      } catch (e) {
+        btn.disabled = false;
+        showStatus("ファイルの読み込みに失敗しました。", "#d93025");
+        console.error(e);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="" />
+  <meta name="theme-color" content="#e8eab0" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://fit365-pop-lp.vercel.app/lp-10.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="FIT365" />
+  <meta property="og:description" content="" />
+  <meta property="og:url" content="https://fit365-pop-lp.vercel.app/lp-10.html" />
+  <meta property="og:image" content="https://fit365-pop-lp.vercel.app/assets/lp/slide-pop-10-final-notice-ja.png" />
+  <title>FIT365</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="pop-spec.css" />
+</head>
+<body class="pop-lp-body">
+  <a class="skip-link" href="#main" data-k="lpSkip">本文へスキップ</a>
+
+  <div class="lang-float">
+    <label for="lang" id="langLabel">Language / 言語</label>
+    <select id="lang" aria-labelledby="langLabel"></select>
+  </div>
+
+  <main id="main" class="lp-main">
+
+    <section class="lp-slide" aria-labelledby="lp-title">
+      <h1 id="lp-title" class="sr-only">10：FIT365最終通告</h1>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig">
+          <img
+            id="lp10-photo"
+            class="lp-slide__img"
+            src="assets/lp/slide-pop-10-final-notice-ja.png"
+            decoding="async"
+            fetchpriority="high"
+            alt=""
+            data-alt-key="lpSlide10Alt"
+          />
+        </figure>
+      </div>
+    </section>
+
+    <p class="lp-footer-note" data-k="lpClientFooter"></p>
+  </main>
+
+  <script>
+    (function () {
+      var LANGS = [
+        { code: "ja", file: "ja.json", label: "日本語" },
+        { code: "en", file: "en.json", label: "English" },
+        { code: "zh-Hans", file: "zh-Hans.json", label: "简体中文" },
+        { code: "zh-Hant", file: "zh-Hant.json", label: "繁體中文" },
+        { code: "ko", file: "ko.json", label: "한국어" }
+      ];
+
+      var keys = ["lpSkip", "lpClientFooter"];
+      var altKeys = ["lpSlide10Alt"];
+      var LP10_IMAGE = {
+        ja: "assets/lp/slide-pop-10-final-notice-ja.png",
+        en: "assets/lp/slide-pop-10-final-notice-en.png",
+        "zh-Hans": "assets/lp/slide-pop-10-final-notice-zh-Hans.png",
+        "zh-Hant": "assets/lp/slide-pop-10-final-notice-zh-Hant.png",
+        ko: "assets/lp/slide-pop-10-final-notice-ko.png"
+      };
+
+      var sel = document.getElementById("lang");
+
+      var linkCanon = document.querySelector('link[rel="canonical"]');
+      var metaOgUrl = document.querySelector('meta[property="og:url"]');
+      var metaOgImage = document.querySelector('meta[property="og:image"]');
+      if (linkCanon) linkCanon.setAttribute("href", location.origin + "/lp-10.html");
+      if (metaOgUrl) metaOgUrl.setAttribute("content", location.origin + "/lp-10.html");
+      if (metaOgImage) metaOgImage.setAttribute("content", location.origin + "/assets/lp/slide-pop-10-final-notice-ja.png");
+
+      LANGS.forEach(function (L) {
+        var opt = document.createElement("option");
+        opt.value = L.code;
+        opt.textContent = L.label;
+        sel.appendChild(opt);
+      });
+
+      var stored = null;
+      try { stored = localStorage.getItem("popViewerLang"); } catch (e) {}
+      if (stored && LANGS.some(function (L) { return L.code === stored; })) sel.value = stored;
+
+      function applyStrings(data) {
+        document.title = data.metaTitle || "FIT365";
+        keys.forEach(function (k) {
+          document.querySelectorAll("[data-k=\"" + k + "\"]").forEach(function (el) {
+            var v = data[k] != null ? data[k] : "";
+            el.textContent = v;
+          });
+        });
+        altKeys.forEach(function (k) {
+          var t = data[k] != null ? data[k] : "";
+          document.querySelectorAll("[data-alt-key=\"" + k + "\"]").forEach(function (img) {
+            img.alt = t;
+          });
+        });
+        document.documentElement.lang = sel.value;
+        syncLp10Image();
+      }
+
+      function syncLp10Image() {
+        var code = sel.value || "ja";
+        var img = document.getElementById("lp10-photo");
+        if (!img) return;
+        img.onerror = function () {
+          img.onerror = null;
+          img.src = LP10_IMAGE.ja;
+        };
+        img.src = LP10_IMAGE[code] || LP10_IMAGE.ja;
+      }
+
+      function loadLang(code) {
+        var item = LANGS.find(function (L) { return L.code === code; }) || LANGS[0];
+        return fetch("i18n/" + item.file)
+          .then(function (r) {
+            if (!r.ok) throw new Error("fetch " + item.file);
+            return r.json();
+          })
+          .then(applyStrings)
+          .catch(function () {
+            if (code !== "ja") return loadLang("ja");
+            applyStrings({});
+          });
+      }
+
+      sel.addEventListener("change", function () {
+        try { localStorage.setItem("popViewerLang", sel.value); } catch (e) {}
+        loadLang(sel.value);
+      });
+
+      loadLang(sel.value);
+    })();
+  </script>
+</body>
+</html>

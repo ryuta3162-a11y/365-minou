@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FIT365 POP</title>
+  <style>
+    :root {
+      --accent: #c2185b;
+      --bg: #fafafa;
+      --card: #fff;
+      --text: #222;
+      --muted: #555;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    header {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    header .home-link {
+      width: 100%;
+      font-size: 0.8rem;
+      color: #fff;
+      opacity: 0.95;
+      text-decoration: underline;
+      margin: 0 0 0.15rem;
+    }
+    header .home-link:hover { opacity: 1; }
+    header .row { width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    header h1 { margin: 0; font-size: 1rem; font-weight: 700; }
+    header label { font-size: 0.85rem; opacity: 0.95; }
+    select {
+      font-size: 0.9rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 4px;
+      border: none;
+      max-width: 100%;
+    }
+    main { max-width: 48rem; margin: 0 auto; padding: 1rem 1rem 2rem; }
+    .card {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 1.25rem 1.1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .brands { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .brands span {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.55rem;
+      background: #fce4ec;
+      color: var(--accent);
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .badge { font-size: 0.85rem; font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; }
+    .headline { font-size: 1.05rem; font-weight: 800; margin: 0 0 0.75rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.35rem; }
+    .lead { color: var(--text); margin: 0.5rem 0; }
+    .section-title { font-size: 0.95rem; font-weight: 700; margin: 1rem 0 0.35rem; color: var(--muted); }
+    ul.notes { margin: 0.25rem 0 0; padding-left: 1.1rem; }
+    ul.notes li { margin: 0.35rem 0; font-size: 0.92rem; }
+    .subcard {
+      margin-top: 0.75rem;
+      padding: 0.85rem;
+      background: #f5f5f5;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .subcard h3 { margin: 0 0 0.4rem; font-size: 0.95rem; color: var(--accent); }
+    .sep {
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 1.25rem 0;
+    }
+    .legacy-note { font-size: 0.85rem; color: var(--muted); margin: 0; line-height: 1.5; }
+    .legacy-note a { color: var(--accent); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="home-link" href="/">← トップ（多言語LP・5言語）はこちら</a>
+    <div class="row">
+      <h1 id="metaTitle">FIT365</h1>
+      <div>
+        <label for="lang">Language / 言語</label>
+        <select id="lang" aria-label="Language">
+          <option value="ja">日本語</option>
+          <option value="en">English</option>
+          <option value="zh-Hans">简体中文</option>
+          <option value="ko">한국어</option>
+        </select>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="card">
+      <div class="brands">
+        <span data-k="brandApp"></span>
+        <span data-k="brandCall"></span>
+      </div>
+      <div class="badge" data-k="badgeImportant"></div>
+      <h2 class="headline" data-k="headline"></h2>
+      <p class="lead" data-k="leadThanks"></p>
+      <p class="lead" data-k="leadUnpaid"></p>
+      <div class="section-title" data-k="sectionSms"></div>
+      <div class="section-title" data-k="notesTitle"></div>
+      <ul class="notes">
+        <li data-k="note1"></li>
+        <li data-k="note2"></li>
+        <li data-k="note3"></li>
+        <li data-k="note4"></li>
+      </ul>
+      <div class="section-title" data-k="howToPayTitle"></div>
+      <p class="lead" data-k="howToPayAppOrKiosk"></p>
+      <p class="lead" style="font-size:0.88rem;color:var(--muted)" data-k="howToPayAppOnly"></p>
+      <p class="lead" style="font-size:0.85rem" data-k="memberNotice"></p>
+
+      <hr class="sep" />
+
+      <div class="subcard">
+        <h3 data-k="appSectionTitle"></h3>
+        <p data-k="appSectionBody"></p>
+      </div>
+      <div class="subcard">
+        <h3 data-k="kioskSectionTitle"></h3>
+        <p data-k="kioskSectionBody"></p>
+      </div>
+
+      <hr class="sep" />
+
+      <p class="legacy-note">掲示用の正式ページは <a href="/">トップ（多言語LP）</a> です。デザイン仕様・サンプルは <a href="design-index.html">design-index</a> / <a href="sample-lp.html">sample-lp</a> を参照してください。</p>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var TRANSLATIONS = {
+        ja: {
+          metaTitle: "FIT365 月会費未納のお知らせ",
+          brandApp: "FIT365アプリ",
+          brandCall: "FIT365コールセンター",
+          badgeImportant: "【重要】 FIT365〇〇",
+          headline: "■〇月月会費未納のお知らせ ■",
+          leadThanks: "平素より FIT365をご利用いただきありがとうございます。",
+          leadUnpaid: "ご登録のクレジットカードより、月会費のお支払いが確認できませんでした。",
+          sectionSms: "ショートメッセージ",
+          notesTitle: "＜注意事項＞",
+          note1: "※支払い確認されるまで施設利用停止",
+          note2: "※クレジットカード変更のみは施設停止解除不可",
+          note3: "※家族会員も利用不可",
+          note4: "※支払い手続きの日時によっては、翌日以降解除",
+          howToPayTitle: "月会費未納のお支払い方法のご案内",
+          howToPayAppOrKiosk: "お支払いは「FIT365アプリ」または「自動受付機」から",
+          howToPayAppOnly: "お支払いは「FIT365アプリ」から",
+          memberNotice: "※会員の皆様へお送りしております。",
+          appSectionTitle: "FIT365アプリからの支払い",
+          appSectionBody: "※アプリからの場合は、アプリ有効化・クレジットカードが必要です。お支払い後ご登録のメールアドレスに支払い完了通知が届きます。",
+          kioskSectionTitle: "店舗自動受付機からの支払い",
+          kioskSectionBody: "お支払い後ご登録のメールアドレスに支払い完了通知が届きます。※受付機からの場合は、会員カード・クレジットカードが必要です。",
+        },
+        en: {
+          metaTitle: "FIT365 Notice: Unpaid Monthly Membership Fee",
+          brandApp: "FIT365 app",
+          brandCall: "FIT365 call center",
+          badgeImportant: "[Important] FIT365 〇〇",
+          headline: "■ Notice of unpaid monthly fee for 〇〇 month ■",
+          leadThanks: "Thank you for using FIT365.",
+          leadUnpaid: "We could not confirm payment of your monthly fee from the credit card on file.",
+          sectionSms: "Text message (SMS)",
+          notesTitle: "Important notes",
+          note1: "Facility use is suspended until payment is confirmed.",
+          note2: "Updating your credit card alone does not lift the suspension.",
+          note3: "Family members cannot use the facility either.",
+          note4: "Depending on when you complete payment, access may resume the following day or later.",
+          howToPayTitle: "How to pay your unpaid monthly fee",
+          howToPayAppOrKiosk: "Pay via the \u201cFIT365\u201d app or the in-store self-service kiosk.",
+          howToPayAppOnly: "Pay via the \u201cFIT365\u201d app.",
+          memberNotice: "\u203bThis notice is sent to our members.",
+          appSectionTitle: "Paying through the FIT365 app",
+          appSectionBody: "\u203bYou need an activated app and a credit card. After payment, a confirmation email will be sent to your registered address.",
+          kioskSectionTitle: "Paying at the in-store self-service kiosk",
+          kioskSectionBody: "After payment, a confirmation email will be sent to your registered address. \u203bAt the kiosk you need your membership card and a credit card.",
+        },
+        "zh-Hans": {
+          metaTitle: "FIT365 月会费欠费通知",
+          brandApp: "FIT365应用",
+          brandCall: "FIT365客服中心",
+          badgeImportant: "【重要】 FIT365〇〇",
+          headline: "■〇月月会费欠费通知 ■",
+          leadThanks: "感谢您平日使用FIT365。",
+          leadUnpaid: "未能从您登记的信用卡确认月会费已支付。",
+          sectionSms: "短信（SMS）",
+          notesTitle: "注意事项",
+          note1: "※在确认付款前，暂停使用设施",
+          note2: "※仅更改信用卡无法解除停用",
+          note3: "※家属会员也不可使用",
+          note4: "※根据办理支付的时间，可能次日或之后才能解除",
+          howToPayTitle: "月会费欠费支付方式说明",
+          howToPayAppOrKiosk: "请通过「FIT365应用」或「自助受理机」支付",
+          howToPayAppOnly: "请通过「FIT365应用」支付",
+          memberNotice: "※本通知发送给各位会员。",
+          appSectionTitle: "通过FIT365应用支付",
+          appSectionBody: "※使用应用支付需已启用应用并绑定信用卡。支付完成后，确认邮件将发送至您登记的邮箱。",
+          kioskSectionTitle: "通过门店自助受理机支付",
+          kioskSectionBody: "支付完成后，确认邮件将发送至您登记的邮箱。※使用受理机需会员卡与信用卡。",
+        },
+        ko: {
+          metaTitle: "FIT365 월 회비 미납 안내",
+          brandApp: "FIT365 앱",
+          brandCall: "FIT365 콜센터",
+          badgeImportant: "【중요】 FIT365〇〇",
+          headline: "■〇월 월 회비 미납 안내 ■",
+          leadThanks: "평소 FIT365를 이용해 주셔서 감사합니다.",
+          leadUnpaid: "등록하신 신용카드로 월 회비 결제가 확인되지 않았습니다.",
+          sectionSms: "문자 메시지(SMS)",
+          notesTitle: "＜유의사항＞",
+          note1: "※결제 확인 전까지 시설 이용 정지",
+          note2: "※신용카드 정보만 변경하는 것으로는 이용 정지 해제 불가",
+          note3: "※가족 회원도 이용 불가",
+          note4: "※결제 시각에 따라 익일 이후 해제될 수 있음",
+          howToPayTitle: "월 회비 미납 납부 방법 안내",
+          howToPayAppOrKiosk: "납부는 「FIT365 앱」 또는 「자동 접수기」에서",
+          howToPayAppOnly: "납부는 「FIT365 앱」에서",
+          memberNotice: "※회원 여러분께 발송하고 있습니다.",
+          appSectionTitle: "FIT365 앱으로 납부",
+          appSectionBody: "※앱으로 납부 시 앱 활성화 및 신용카드가 필요합니다. 납부 후 등록 이메일로 결제 완료 알림이 발송됩니다.",
+          kioskSectionTitle: "매장 자동 접수기로 납부",
+          kioskSectionBody: "납부 후 등록 이메일로 결제 완료 알림이 발송됩니다. ※접수기 이용 시 회원 카드·신용카드가 필요합니다.",
+        }
+      };
+
+      var sel = document.getElementById("lang");
+      var keys = [
+        "brandApp", "brandCall", "badgeImportant", "headline", "leadThanks", "leadUnpaid",
+        "sectionSms", "notesTitle", "note1", "note2", "note3", "note4",
+        "howToPayTitle", "howToPayAppOrKiosk", "howToPayAppOnly", "memberNotice",
+        "appSectionTitle", "appSectionBody", "kioskSectionTitle", "kioskSectionBody",
+      ];
+
+      function apply(t) {
+        document.title = t.metaTitle || "FIT365";
+        var mt = document.getElementById("metaTitle");
+        if (mt) mt.textContent = t.metaTitle || "FIT365";
+        keys.forEach(function (k) {
+          document.querySelectorAll("[data-k=\"" + k + "\"]").forEach(function (el) {
+            el.textContent = t[k] != null ? t[k] : "";
+          });
+        });
+        document.documentElement.lang = sel.value === "zh-Hans" ? "zh-Hans" : sel.value;
+      }
+
+      function currentBundle() {
+        return TRANSLATIONS[sel.value] || TRANSLATIONS.ja;
+      }
+
+      sel.addEventListener("change", function () {
+        apply(currentBundle());
+      });
+
+      apply(currentBundle());
+    })();
+  </script>
+</body>
+</html>

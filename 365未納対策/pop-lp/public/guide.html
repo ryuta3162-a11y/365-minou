@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="" />
+  <meta name="theme-color" content="#e8eab0" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://fit365-pop-lp.vercel.app/guide.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="FIT365" />
+  <meta property="og:description" content="" />
+  <meta property="og:url" content="https://fit365-pop-lp.vercel.app/guide.html" />
+  <meta property="og:image" content="https://fit365-pop-lp.vercel.app/assets/lp/slide-billing-guide-full.png" />
+  <title>FIT365</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="pop-spec.css" />
+</head>
+<body class="pop-lp-body guide-lp-body">
+  <a class="skip-link" href="#main" data-k="lpSkip">本文へスキップ</a>
+
+  <div class="lang-float">
+    <label for="lang" id="langLabel">Language / 言語</label>
+    <select id="lang" aria-labelledby="langLabel"></select>
+  </div>
+
+  <main id="main" class="lp-main guide-main">
+    <p id="langVisualNote" class="lp-lang-note" role="status" hidden data-k="guideVisualLangNote"></p>
+
+    <section id="slide-billing" class="lp-slide" aria-labelledby="billing-title">
+      <h2 id="billing-title" class="sr-only" data-k="guideNav1"></h2>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig lp-slide__stack guide-stack">
+          <img
+            id="guide-bill-photo"
+            class="lp-slide__img"
+            src="assets/lp/slide-billing-guide-full.png"
+            decoding="async"
+            fetchpriority="high"
+            alt=""
+            data-alt-key="guideBillSlideAlt"
+          />
+        </figure>
+      </div>
+    </section>
+
+    <section id="slide-cc" class="lp-slide" aria-labelledby="cc-title">
+      <h2 id="cc-title" class="sr-only" data-k="guideNav2"></h2>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig lp-slide__stack guide-stack guide-stack--cc">
+          <img
+            id="guide-cc-photo"
+            class="lp-slide__img"
+            src="assets/lp/slide-cc-change-flow.png"
+            loading="lazy"
+            decoding="async"
+            alt=""
+            data-alt-key="guideCcSlideAlt"
+          />
+        </figure>
+      </div>
+    </section>
+
+    <p class="lp-footer-note" data-k="lpClientFooter"></p>
+  </main>
+
+  <script>
+    (function () {
+      var LANGS = [
+        { code: "ja", file: "ja.json", label: "日本語" },
+        { code: "en", file: "en.json", label: "English" },
+        { code: "zh-Hans", file: "zh-Hans.json", label: "简体中文" },
+        { code: "zh-Hant", file: "zh-Hant.json", label: "繁體中文" },
+        { code: "ko", file: "ko.json", label: "한국어" }
+      ];
+
+      var GUIDE_BILL_SRC = {
+        ja: "assets/lp/slide-billing-guide-full.png",
+        en: "assets/lp/slide-billing-guide-en.png",
+        "zh-Hans": "assets/lp/slide-billing-guide-zh-Hans.png",
+        "zh-Hant": "assets/lp/slide-billing-guide-zh-Hant.png",
+        ko: "assets/lp/slide-billing-guide-ko.png"
+      };
+
+      var GUIDE_CC_SRC = {
+        ja: "assets/lp/slide-cc-change-flow.png",
+        en: "assets/lp/slide-cc-change-flow-en.png",
+        "zh-Hans": "assets/lp/slide-cc-change-flow-zh-Hans.png",
+        "zh-Hant": "assets/lp/slide-cc-change-flow-zh-Hant.png",
+        ko: "assets/lp/slide-cc-change-flow-ko.png"
+      };
+
+      var keys = [
+        "lpSkip", "guideNav1", "guideNav2",
+        "guideBillSlideAlt", "guideCcSlideAlt",
+        "guideVisualLangNote", "lpClientFooter"
+      ];
+
+      var altKeys = ["guideBillSlideAlt", "guideCcSlideAlt"];
+
+      var sel = document.getElementById("lang");
+      var langNote = document.getElementById("langVisualNote");
+
+      function syncGuideRasterImages() {
+        var code = sel.value;
+        var billSrc = GUIDE_BILL_SRC[code] || GUIDE_BILL_SRC.ja;
+        var ccSrc = GUIDE_CC_SRC[code] || GUIDE_CC_SRC.ja;
+        var billImg = document.getElementById("guide-bill-photo");
+        var ccImg = document.getElementById("guide-cc-photo");
+        if (billImg) {
+          billImg.onerror = function () {
+            billImg.onerror = null;
+            billImg.src = GUIDE_BILL_SRC.ja;
+          };
+          billImg.src = billSrc;
+        }
+        if (ccImg) {
+          ccImg.onerror = function () {
+            ccImg.onerror = null;
+            ccImg.src = GUIDE_CC_SRC.ja;
+          };
+          ccImg.src = ccSrc;
+        }
+      }
+
+      var linkCanon = document.querySelector('link[rel="canonical"]');
+      var metaOgUrl = document.querySelector('meta[property="og:url"]');
+      var metaOgImage = document.querySelector('meta[property="og:image"]');
+      if (linkCanon) linkCanon.setAttribute("href", location.origin + "/guide.html");
+      if (metaOgUrl) metaOgUrl.setAttribute("content", location.origin + "/guide.html");
+      if (metaOgImage) metaOgImage.setAttribute("content", location.origin + "/assets/lp/slide-billing-guide-full.png");
+
+      LANGS.forEach(function (L) {
+        var opt = document.createElement("option");
+        opt.value = L.code;
+        opt.textContent = L.label;
+        sel.appendChild(opt);
+      });
+
+      var stored = null;
+      try { stored = localStorage.getItem("popViewerLang"); } catch (e) {}
+      if (stored && LANGS.some(function (L) { return L.code === stored; })) sel.value = stored;
+
+      function applyStrings(data) {
+        document.title = data.guideMetaTitle || data.metaTitle || "FIT365";
+        keys.forEach(function (k) {
+          document.querySelectorAll("[data-k=\"" + k + "\"]").forEach(function (el) {
+            var v = data[k] != null ? data[k] : "";
+            el.textContent = v;
+          });
+        });
+        altKeys.forEach(function (k) {
+          var t = data[k] != null ? data[k] : "";
+          document.querySelectorAll("[data-alt-key=\"" + k + "\"]").forEach(function (img) {
+            img.alt = t;
+          });
+        });
+        document.documentElement.lang = sel.value;
+        if (langNote) {
+          var nv = data.guideVisualLangNote != null ? data.guideVisualLangNote : "";
+          if (nv) {
+            langNote.hidden = false;
+            langNote.textContent = nv;
+          } else {
+            langNote.hidden = true;
+            langNote.textContent = "";
+          }
+        }
+        var ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute("content", document.title);
+        var ogDesc = document.querySelector('meta[property="og:description"]');
+        var desc = data.guideOgDescription || data.lpOgDescription || "";
+        if (ogDesc && desc) ogDesc.setAttribute("content", desc);
+        var metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc && desc) metaDesc.setAttribute("content", desc);
+        syncGuideRasterImages();
+      }
+
+      function loadLang(code) {
+        var item = LANGS.find(function (L) { return L.code === code; }) || LANGS[0];
+        return fetch("i18n/" + item.file)
+          .then(function (r) {
+            if (!r.ok) throw new Error("fetch " + item.file);
+            return r.json();
+          })
+          .then(applyStrings)
+          .catch(function () {
+            if (code !== "ja") return loadLang("ja");
+            applyStrings({});
+          });
+      }
+
+      sel.addEventListener("change", function () {
+        try { localStorage.setItem("popViewerLang", sel.value); } catch (e) {}
+        loadLang(sel.value);
+      });
+
+      (function firstPaintRaster() {
+        var code = sel.value || "ja";
+        var bill = document.getElementById("guide-bill-photo");
+        var cc = document.getElementById("guide-cc-photo");
+        if (bill) bill.src = GUIDE_BILL_SRC[code] || GUIDE_BILL_SRC.ja;
+        if (cc) cc.src = GUIDE_CC_SRC[code] || GUIDE_CC_SRC.ja;
+      })();
+
+      loadLang(sel.value);
+    })();
+  </script>
+</body>
+</html>

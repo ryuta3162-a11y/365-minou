@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FIT365 LP 制作メモ（3スライド）</title>
+  <style>
+    body { font-family: "Noto Sans JP", Meiryo, sans-serif; margin: 0; padding: 1.25rem; background: #f4f4f4; color: #222; line-height: 1.55; }
+    .wrap { max-width: 44rem; margin: 0 auto; background: #fff; padding: 1.25rem 1.5rem 2rem; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+    h1 { font-size: 1.2rem; margin: 0 0 0.5rem; }
+    h2 { font-size: 1rem; margin: 1.35rem 0 0.4rem; border-bottom: 2px solid #c2185b; padding-bottom: 0.2rem; }
+    p, li { font-size: 0.88rem; }
+    code { background: #f0f0f0; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.82rem; }
+    ul { padding-left: 1.2rem; }
+    .links a { display: inline-block; margin: 0.35rem 0.5rem 0 0; padding: 0.45rem 0.8rem; background: #c2185b; color: #fff; text-decoration: none; font-weight: 700; border-radius: 6px; font-size: 0.85rem; }
+    .links a.sec { background: #333; }
+    .note { background: #fff8e1; border: 1px solid #ffe082; padding: 0.65rem; border-radius: 8px; margin-top: 1rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>FIT365 クライアント提供用 LP（トップ／キオスク／ガイド）</h1>
+    <p><code>index.html</code> は Canva 番号 <strong>1–2（→guide）</strong> と <strong>3–6（アプリ・受付機・日本語1枚）</strong>。従来の <code>slide-01-pop</code> 等の重ねテキストはトップから外し、<code>kiosk.html</code> では従来どおり未納POP＋受付機スライドを利用。</p>
+    <div class="links">
+      <a href="/">本番（多言語）</a>
+      <a href="guide.html" class="sec">LP3（請求・カード変更）</a>
+      <a href="lp-3-6.html" class="sec">LP（3–6）</a>
+      <a href="lp-7-9.html" class="sec">LP（7–9）</a>
+      <a href="lp-10.html" class="sec">LP（10）</a>
+      <a href="sample-lp.html" class="sec">画像のみ確認</a>
+      <a href="pop-spec.css" class="sec">pop-spec.css</a>
+    </div>
+
+    <h2>アセット配置</h2>
+    <ul>
+      <li><code>slide-pop-03-06-app-kiosk-ja.png</code> … トップ <code>index.html</code> 用（Canva 3–6・現状日本語）</li>
+      <li><code>slide-pop-10-final-notice-ja.png</code> … トップ <code>index.html</code> 用（Canva 10・最終通告・日本語）</li>
+      <li><code>slide-pop-07-app-only-ja.png</code> … <code>lp-7-9.html</code> 用（Canva 7・現状日本語）</li>
+      <li><code>slide-pop-09-app-only-ja.png</code> … <code>lp-7-9.html</code> 用（Canva 9・現状日本語）</li>
+      <li><code>slide-01-pop.png</code> / <code>slide-02-app.png</code> / <code>slide-03-kiosk.png</code> … <code>kiosk.html</code> 等で利用</li>
+    </ul>
+
+    <h2>LP3（請求・カード変更）</h2>
+    <ul>
+      <li><code>guide.html</code> … 言語切替で <strong>完成 PNG を差し替え</strong>（テキストは画像内。JSON は <code>title</code> / <code>alt</code> / フッター等のみ）</li>
+      <li>請求: <code>slide-billing-guide-full.png</code>（ja）／<code>slide-billing-guide-en.png</code>／<code>slide-billing-guide-zh-Hans.png</code>／<code>slide-billing-guide-zh-Hant.png</code>／<code>slide-billing-guide-ko.png</code></li>
+      <li>CC: <code>slide-cc-change-flow.png</code>（ja）／<code>slide-cc-change-flow-en.png</code> 等（同上の言語サフィックス）。未配置の言語は自動で日本語 PNG にフォールバック</li>
+      <li><code>slide-billing-guide-template.png</code> … 参考用（本番の画像差し替えでは未使用）</li>
+      <li>スライド間のピルナビは<strong>非表示</strong>（右上の言語切替のみ）</li>
+    </ul>
+    <p class="note">英語の文案は <code>i18n/en.json</code> の <code>guideBill*</code> / <code>guideCc*</code> と一致させると、従来のオーバーレイ文言と揃います。</p>
+
+    <h2>実装の要点</h2>
+    <ul>
+      <li>上部に <strong>FIT365ロゴヘッダーなし</strong>（言語切替のみ右上固定）</li>
+      <li>スティッキー <strong>①②③ナビ</strong> で各スライドへスクロール</li>
+      <li><code>img</code> の <code>alt</code> は言語JSON（<code>lpSlide1Alt</code> 等）で切替</li>
+      <li>日本語以外では <code>lpVisualLangNote</code> で「図は日本語」と明示</li>
+      <li>フッター注記 <code>lpClientFooter</code>（最終確認の免責）</li>
+      <li>OGP 画像は1枚目を指定</li>
+    </ul>
+
+    <p class="note">デザインのピクセル一致は<strong>画像ファイル</strong>が正。HTML/CSSは枠・ナビ・アクセシビリティ層です。差し替え時はファイル名を維持するか、<code>index.html</code> のパスを更新してください。</p>
+  </div>
+</body>
+</html>

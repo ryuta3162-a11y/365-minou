@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="" />
+  <meta name="theme-color" content="#e8eab0" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://fit365-pop-lp.vercel.app/lp-3-6.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="FIT365" />
+  <meta property="og:description" content="" />
+  <meta property="og:url" content="https://fit365-pop-lp.vercel.app/lp-3-6.html" />
+  <meta property="og:image" content="https://fit365-pop-lp.vercel.app/assets/lp/slide-pop-03-06-app-kiosk-ja.png" />
+  <title>FIT365</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="pop-spec.css" />
+</head>
+<body class="pop-lp-body">
+  <a class="skip-link" href="#main" data-k="lpSkip">本文へスキップ</a>
+
+  <div class="lang-float">
+    <label for="lang" id="langLabel">Language / 言語</label>
+    <select id="lang" aria-labelledby="langLabel"></select>
+  </div>
+
+  <main id="main" class="lp-main">
+
+    <section class="lp-slide" aria-labelledby="lp-title">
+      <h1 id="lp-title" class="sr-only">3–6：FIT365アプリ・キオスク端末からの手続き可能店舗</h1>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig lp-slide__stack">
+          <img
+            id="lp36-slide3-img"
+            class="lp-slide__img"
+            src="assets/lp/slide-pop-03-06-app-kiosk-ja.png"
+            decoding="async"
+            fetchpriority="high"
+            alt=""
+            data-alt-key="lpSlide306Alt"
+          />
+          <div class="lp-slide__overlay lp-slide__overlay--lp36a">
+            <p class="lp36a-title" data-k="lp36Slide3Title"></p>
+            <p class="lp36a-lead" data-k-html="lp36Slide3LeadHtml"></p>
+            <p class="lp36a-foot" data-k-html="lp36Slide3FootHtml"></p>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="lp-slide" aria-labelledby="lp-title-2">
+      <h2 id="lp-title-2" class="sr-only">6：店舗自動受付機からの支払い</h2>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig lp-slide__stack">
+          <img
+            id="lp36-slide6-img"
+            class="lp-slide__img"
+            src="assets/lp/slide-pop-06-kiosk-payment-ja.png"
+            loading="lazy"
+            decoding="async"
+            alt=""
+            data-alt-key="lpSlide3Alt"
+          />
+          <div class="lp-slide__overlay lp-slide__overlay--lp36b">
+            <p class="lp36b-title" data-k="lp36Slide6Title"></p>
+            <p class="lp36b-sub" data-k="lp36Slide6Sub"></p>
+            <p class="lp36b-foot" data-k="lp36Slide6Foot"></p>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <p class="lp-footer-note" data-k="lpClientFooter"></p>
+  </main>
+
+  <script>
+    (function () {
+      var LANGS = [
+        { code: "ja", file: "ja.json", label: "日本語" },
+        { code: "en", file: "en.json", label: "English" },
+        { code: "zh-Hans", file: "zh-Hans.json", label: "简体中文" },
+        { code: "zh-Hant", file: "zh-Hant.json", label: "繁體中文" },
+        { code: "ko", file: "ko.json", label: "한국어" }
+      ];
+
+      var keys = [
+        "lpSkip", "lpClientFooter",
+        "lp36Slide3Title", "lp36Slide6Title", "lp36Slide6Sub", "lp36Slide6Foot"
+      ];
+      var htmlKeys = ["lp36Slide3LeadHtml", "lp36Slide3FootHtml"];
+      var altKeys = ["lpSlide306Alt", "lpSlide3Alt"];
+      var SLIDE3_IMAGE = {
+        ja: "assets/lp/slide-pop-03-06-app-kiosk-ja.png",
+        en: "assets/lp/slide-pop-03-06-app-kiosk-en.png",
+        "zh-Hans": "assets/lp/slide-pop-03-06-app-kiosk-zh-Hans.png",
+        "zh-Hant": "assets/lp/slide-pop-03-06-app-kiosk-zh-Hant.png",
+        ko: "assets/lp/slide-pop-03-06-app-kiosk-ko.png"
+      };
+      var SLIDE6_IMAGE = {
+        ja: "assets/lp/slide-pop-06-kiosk-payment-ja.png",
+        en: "assets/lp/slide-pop-06-kiosk-payment-en.png",
+        "zh-Hans": "assets/lp/slide-pop-06-kiosk-payment-zh-Hans.png",
+        "zh-Hant": "assets/lp/slide-pop-06-kiosk-payment-zh-Hant.png",
+        ko: "assets/lp/slide-pop-06-kiosk-payment-ko.png"
+      };
+      var LP36_LOCAL = {
+        ja: {
+          lp36Slide3Title: "月会費未納のお支払いについて",
+          lp36Slide3LeadHtml: "以下の表示・またはメッセージが届いた方は<br />月会費のお支払いができておりません。<br />支払い方法をご確認いただき、お支払いをお願いいたします。",
+          lp36Slide3FootHtml: "お支払いは「FIT365アプリ」または「自動受付機」から",
+          lp36Slide6Title: "店舗自動受付機からの支払い",
+          lp36Slide6Sub: "※受付機からの場合は、会員カード・クレジットカードが必要です。",
+          lp36Slide6Foot: "お支払い後ご登録のメールアドレスに支払い完了通知が届きます。",
+          lpSlide306Alt: "月会費未納案内（アプリ画面・SMS例・支払い方法・注意事項）",
+          lpSlide3Alt: "店舗自動受付機からの支払い手順案内"
+        },
+        en: {
+          lp36Slide3Title: "About unpaid monthly fee payment",
+          lp36Slide3LeadHtml: "If you see the following in the app or receive the message below,<br />your monthly fee payment has not been completed.<br />Please check the payment method and complete payment.",
+          lp36Slide3FootHtml: "Pay via the \"FIT365 app\" or the \"self-service kiosk\"",
+          lp36Slide6Title: "Payment at the in-store self-service kiosk",
+          lp36Slide6Sub: "For kiosk payment, your membership card and credit card are required.",
+          lp36Slide6Foot: "After payment, a completion notice is sent to your registered email address.",
+          lpSlide306Alt: "Unpaid monthly fee poster with app and SMS examples.",
+          lpSlide3Alt: "Payment flow via in-store self-service kiosk."
+        },
+        "zh-Hans": {
+          lp36Slide3Title: "关于月会费欠费支付",
+          lp36Slide3LeadHtml: "如果您在应用中看到以下提示，或收到相关短信，<br />表示月会费尚未支付成功。<br />请确认支付方式并完成支付。",
+          lp36Slide3FootHtml: "可通过“FIT365应用”或“自助受理机”支付",
+          lp36Slide6Title: "通过门店自助受理机支付",
+          lp36Slide6Sub: "通过受理机支付时，需要会员卡和信用卡。",
+          lp36Slide6Foot: "支付完成后，将向您登记的邮箱发送支付完成通知。",
+          lpSlide306Alt: "月会费欠费提醒海报，含应用提示与短信示例。",
+          lpSlide3Alt: "门店自助受理机支付步骤说明。"
+        },
+        "zh-Hant": {
+          lp36Slide3Title: "關於月會費欠費支付",
+          lp36Slide3LeadHtml: "如果您在應用程式中看到以下提示，或收到相關簡訊，<br />表示月會費尚未支付成功。<br />請確認支付方式並完成支付。",
+          lp36Slide3FootHtml: "可透過「FIT365應用程式」或「自助受理機」支付",
+          lp36Slide6Title: "透過門市自助受理機支付",
+          lp36Slide6Sub: "透過受理機支付時，需要會員卡和信用卡。",
+          lp36Slide6Foot: "支付完成後，將向您登記的信箱寄送支付完成通知。",
+          lpSlide306Alt: "月會費欠費提醒海報，含應用程式提示與簡訊範例。",
+          lpSlide3Alt: "門市自助受理機支付步驟說明。"
+        },
+        ko: {
+          lp36Slide3Title: "월 회비 미납 결제 안내",
+          lp36Slide3LeadHtml: "앱에서 아래 표시가 보이거나 문자를 받으신 경우,<br />월 회비 결제가 완료되지 않은 상태입니다.<br />결제 방법을 확인하시고 결제를 진행해 주세요.",
+          lp36Slide3FootHtml: "\"FIT365 앱\" 또는 \"자동 접수기\"에서 결제할 수 있습니다.",
+          lp36Slide6Title: "매장 자동 접수기에서 결제",
+          lp36Slide6Sub: "접수기로 결제할 경우 회원카드와 신용카드가 필요합니다.",
+          lp36Slide6Foot: "결제 후 등록된 이메일로 결제 완료 안내가 발송됩니다.",
+          lpSlide306Alt: "월 회비 미납 안내 포스터(앱 안내 및 문자 예시).",
+          lpSlide3Alt: "매장 자동 접수기 결제 절차 안내."
+        }
+      };
+
+      var sel = document.getElementById("lang");
+
+      var linkCanon = document.querySelector('link[rel="canonical"]');
+      var metaOgUrl = document.querySelector('meta[property="og:url"]');
+      var metaOgImage = document.querySelector('meta[property="og:image"]');
+      if (linkCanon) linkCanon.setAttribute("href", location.origin + "/lp-3-6.html");
+      if (metaOgUrl) metaOgUrl.setAttribute("content", location.origin + "/lp-3-6.html");
+      if (metaOgImage) metaOgImage.setAttribute("content", location.origin + "/assets/lp/slide-pop-03-06-app-kiosk-ja.png");
+
+      LANGS.forEach(function (L) {
+        var opt = document.createElement("option");
+        opt.value = L.code;
+        opt.textContent = L.label;
+        sel.appendChild(opt);
+      });
+
+      var stored = null;
+      try { stored = localStorage.getItem("popViewerLang"); } catch (e) {}
+      if (stored && LANGS.some(function (L) { return L.code === stored; })) sel.value = stored;
+
+      function applyStrings(data) {
+        var local = LP36_LOCAL[sel.value] || LP36_LOCAL.ja;
+        function pick(k) {
+          return data[k] != null && data[k] !== "" ? data[k] : (local[k] != null ? local[k] : "");
+        }
+        document.title = data.metaTitle || "FIT365";
+        keys.forEach(function (k) {
+          document.querySelectorAll("[data-k=\"" + k + "\"]").forEach(function (el) {
+            var v = pick(k);
+            el.textContent = v;
+          });
+        });
+        htmlKeys.forEach(function (k) {
+          document.querySelectorAll("[data-k-html=\"" + k + "\"]").forEach(function (el) {
+            var v = pick(k);
+            el.innerHTML = v;
+          });
+        });
+        altKeys.forEach(function (k) {
+          var t = pick(k);
+          document.querySelectorAll("[data-alt-key=\"" + k + "\"]").forEach(function (img) {
+            img.alt = t;
+          });
+        });
+        document.documentElement.lang = sel.value;
+        syncSlide3ByLanguage();
+      }
+
+      function syncSlide3ByLanguage() {
+        var code = sel.value || "ja";
+        var img = document.getElementById("lp36-slide3-img");
+        var img6 = document.getElementById("lp36-slide6-img");
+        if (img) {
+          img.onerror = function () {
+            img.onerror = null;
+            img.src = SLIDE3_IMAGE.ja;
+          };
+          img.src = SLIDE3_IMAGE[code] || SLIDE3_IMAGE.ja;
+        }
+        if (img6) {
+          img6.onerror = function () {
+            img6.onerror = null;
+            img6.src = SLIDE6_IMAGE.ja;
+          };
+          img6.src = SLIDE6_IMAGE[code] || SLIDE6_IMAGE.ja;
+        }
+        var hideOverlay = code === "ja" || code === "en" || code === "zh-Hans" || code === "zh-Hant" || code === "ko";
+        document.querySelectorAll(".lp-slide__overlay--lp36a, .lp-slide__overlay--lp36b").forEach(function (el) {
+          el.style.display = hideOverlay ? "none" : "";
+        });
+      }
+
+      function loadLang(code) {
+        var item = LANGS.find(function (L) { return L.code === code; }) || LANGS[0];
+        return fetch("i18n/" + item.file)
+          .then(function (r) {
+            if (!r.ok) throw new Error("fetch " + item.file);
+            return r.json();
+          })
+          .then(applyStrings)
+          .catch(function () {
+            if (code !== "ja") return loadLang("ja");
+            applyStrings({});
+          });
+      }
+
+      sel.addEventListener("change", function () {
+        try { localStorage.setItem("popViewerLang", sel.value); } catch (e) {}
+        loadLang(sel.value);
+      });
+
+      loadLang(sel.value);
+    })();
+  </script>
+</body>
+</html>

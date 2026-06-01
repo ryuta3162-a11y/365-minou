@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="FIT365 月会費未納のお知らせ・店舗自動受付機からのお支払い方法のご案内（多言語メニュー付き）。" />
+  <meta name="theme-color" content="#e8eab0" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://fit365-pop-lp.vercel.app/kiosk.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="FIT365" />
+  <meta property="og:description" content="" />
+  <meta property="og:url" content="https://fit365-pop-lp.vercel.app/kiosk.html" />
+  <meta property="og:image" content="https://fit365-pop-lp.vercel.app/assets/lp/slide-01-pop.png" />
+  <title>FIT365</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="pop-spec.css" />
+</head>
+<body class="pop-lp-body">
+  <a class="skip-link" href="#main" data-k="lpSkip">本文へスキップ</a>
+
+  <div class="lang-float">
+    <label for="lang" id="langLabel">Language / 言語</label>
+    <select id="lang" aria-labelledby="langLabel"></select>
+  </div>
+
+  <nav class="lp-toc" aria-label="スライド内ナビゲーション">
+    <a href="#slide-1" data-k="lpNav1"></a>
+    <a href="#slide-3" data-k="lpNav3"></a>
+  </nav>
+
+  <main id="main" class="lp-main">
+    <p id="langVisualNote" class="lp-lang-note" role="status" hidden data-k="lpVisualLangNote"></p>
+
+    <section id="slide-1" class="lp-slide" aria-labelledby="slide1-title">
+      <h2 id="slide1-title" class="sr-only" data-k="lpNav1"></h2>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig lp-slide__stack">
+          <img
+            class="lp-slide__img"
+            src="assets/lp/slide-01-pop.png"
+            decoding="async"
+            fetchpriority="high"
+            alt=""
+            data-alt-key="lpSlide1Alt"
+          />
+          <div class="lp-slide__overlay lp-slide__overlay--s1">
+            <div class="lp-s1-topbox">
+              <p class="lp-s1-title" data-k="howToPayTitle"></p>
+              <p class="lp-s1-member" data-k="memberNotice"></p>
+            </div>
+            <span class="lp-s1-pill lp-s1-pill--left" data-k="lpQrPanelLabel"></span>
+            <span class="lp-s1-pill lp-s1-pill--middle" data-k="lpAppTopPanelLabel"></span>
+            <span class="lp-s1-pill lp-s1-pill--right" data-k="lpSmsPanelLabel"></span>
+            <div class="lp-s1-bottombox">
+              <p class="lp-s1-payline" data-k-html="lpHowToPayLineHtml"></p>
+              <p class="lp-s1-subnote" data-k="lpKioskOnlyAppNote"></p>
+              <ul class="lp-s1-ul">
+                <li data-k="note1"></li>
+                <li data-k="note2"></li>
+                <li data-k="note3"></li>
+                <li data-k="note4"></li>
+              </ul>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <section id="slide-3" class="lp-slide" aria-labelledby="slide3-title">
+      <h2 id="slide3-title" class="sr-only" data-k="lpNav3"></h2>
+      <div class="lp-slide__card">
+        <figure class="lp-slide__fig lp-slide__stack">
+          <img
+            class="lp-slide__img"
+            src="assets/lp/slide-03-kiosk.png"
+            loading="lazy"
+            decoding="async"
+            alt=""
+            data-alt-key="lpSlide3Alt"
+          />
+          <div class="lp-slide__overlay lp-slide__overlay--s3">
+            <div class="lp-s3-topbox">
+              <p class="lp-s3-title" data-k="kioskSectionTitle"></p>
+            </div>
+            <p class="lp-s3-sub" data-k="lpKioskIntro"></p>
+            <p class="lp-s3-foot" data-k="lpAppFlowOutro"></p>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <p class="lp-footer-note" data-k="lpClientFooter"></p>
+  </main>
+
+  <script>
+    (function () {
+      var LANGS = [
+        { code: "ja", file: "ja.json", label: "日本語" },
+        { code: "en", file: "en.json", label: "English" },
+        { code: "zh-Hans", file: "zh-Hans.json", label: "简体中文" },
+        { code: "zh-Hant", file: "zh-Hant.json", label: "繁體中文" },
+        { code: "ko", file: "ko.json", label: "한국어" }
+      ];
+
+      var keys = [
+        "lpSkip", "lpNav1", "lpNav3",
+        "lpSlide1Alt", "lpSlide3Alt",
+        "lpVisualLangNote", "lpClientFooter",
+        "howToPayTitle", "memberNotice", "brandApp", "lpPhoneAppAlert",
+        "sectionSms", "badgeImportant", "headline", "leadThanks", "leadUnpaid",
+        "lpQrPanelLabel", "lpAppTopPanelLabel", "lpSmsPanelLabel",
+        "notesTitle", "note1", "note2", "note3", "note4", "howToPayAppOnly",
+        "lpKioskOnlyAppNote",
+        "kioskSectionTitle", "lpKioskIntro", "lpAppFlowOutro"
+      ];
+
+      var htmlKeys = ["lpHowToPayLineHtml"];
+
+      var altKeys = ["lpSlide1Alt", "lpSlide3Alt"];
+
+      var sel = document.getElementById("lang");
+      var langNote = document.getElementById("langVisualNote");
+
+      var linkCanon = document.querySelector('link[rel="canonical"]');
+      var metaOgUrl = document.querySelector('meta[property="og:url"]');
+      var metaOgImage = document.querySelector('meta[property="og:image"]');
+      if (linkCanon) linkCanon.setAttribute("href", location.origin + "/kiosk.html");
+      if (metaOgUrl) metaOgUrl.setAttribute("content", location.origin + "/kiosk.html");
+      if (metaOgImage) metaOgImage.setAttribute("content", location.origin + "/assets/lp/slide-01-pop.png");
+
+      LANGS.forEach(function (L) {
+        var opt = document.createElement("option");
+        opt.value = L.code;
+        opt.textContent = L.label;
+        sel.appendChild(opt);
+      });
+
+      function applyStrings(data) {
+        document.title = data.metaTitle || "FIT365";
+        keys.forEach(function (k) {
+          document.querySelectorAll("[data-k=\"" + k + "\"]").forEach(function (el) {
+            var v = data[k] != null ? data[k] : "";
+            el.textContent = v;
+          });
+        });
+        htmlKeys.forEach(function (k) {
+          document.querySelectorAll("[data-k-html=\"" + k + "\"]").forEach(function (el) {
+            var v = data[k] != null ? data[k] : "";
+            el.innerHTML = v;
+          });
+        });
+        altKeys.forEach(function (k) {
+          var t = data[k] != null ? data[k] : "";
+          document.querySelectorAll("[data-alt-key=\"" + k + "\"]").forEach(function (img) {
+            img.alt = t;
+          });
+        });
+        document.documentElement.lang = sel.value;
+        if (langNote) {
+          langNote.hidden = true;
+          langNote.textContent = "";
+        }
+        var ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute("content", document.title);
+        var ogDesc = document.querySelector('meta[property="og:description"]');
+        var desc = data.lpOgDescription || data.metaTitle || "";
+        if (ogDesc && desc) ogDesc.setAttribute("content", desc);
+        var metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc && desc) metaDesc.setAttribute("content", desc);
+      }
+
+      function loadLang(code) {
+        var item = LANGS.find(function (L) { return L.code === code; }) || LANGS[0];
+        return fetch("i18n/" + item.file)
+          .then(function (r) {
+            if (!r.ok) throw new Error("fetch " + item.file);
+            return r.json();
+          })
+          .then(applyStrings)
+          .catch(function () {
+            if (code !== "ja") return loadLang("ja");
+            applyStrings({});
+          });
+      }
+
+      var stored = null;
+      try { stored = localStorage.getItem("popViewerLang"); } catch (e) {}
+      if (stored && LANGS.some(function (L) { return L.code === stored; })) sel.value = stored;
+      sel.addEventListener("change", function () {
+        try { localStorage.setItem("popViewerLang", sel.value); } catch (e) {}
+        loadLang(sel.value);
+      });
+
+      loadLang(sel.value);
+    })();
+  </script>
+</body>
+</html>
