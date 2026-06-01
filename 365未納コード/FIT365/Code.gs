@@ -21,8 +21,10 @@ var FIT365_FALLBACK_COL_PAID_CHECK = 22;
 /** 月次未納シートのコピー元（テンプレート） */
 var FIT365_GENPON_SHEET_NAME = "原本";
 
-/** 時間トリガーで実行する関数名（毎月1日） */
+/** 時間トリガーで実行する関数名（毎月1日・UI なし） */
 var FIT365_MONTHLY_GENPON_HANDLER = "fit365MonthlyCreateSheetFromGenpon";
+/** 手動専用（時間トリガーに付けると getUi で失敗する） */
+var FIT365_MONTHLY_GENPON_HANDLER_MANUAL = "fit365MonthlyCreateSheetFromGenponManual";
 
 /** シート名パターン: 【店舗】26年4月（西暦下2桁・月は1〜2桁） */
 var FIT365_MONTHLY_SHEET_NAME_RE = /^【([^】]+)】(\d{2})年(\d{1,2})月$/;
@@ -209,21 +211,28 @@ function fit365GetStoreNameFromSheet_(sheet) {
   return cell.replace(/^[「『【](.+)[」』】]$/, "$1").trim();
 }
 
-function fit365AuthStep1() {
+function fit365OpAlertDone_() {
+  SpreadsheetApp.getUi().alert("完了しました", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function fit365OpAlertError_() {
+  SpreadsheetApp.getUi().alert("エラー", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function fit365AuthStep1Core_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var ui = SpreadsheetApp.getUi();
   fit365EnsureControlSheet_(ss);
+  SpreadsheetApp.openById(FIT365_STORE_HUB_SPREADSHEET_ID).getName();
+}
+
+function fit365AuthStep1() {
   try {
-    SpreadsheetApp.openById(FIT365_STORE_HUB_SPREADSHEET_ID).getName();
+    fit365AuthStep1Core_();
+    fit365OpAlertDone_();
   } catch (e1) {
-    ui.alert("➊ 初回権限", "全店ブックに接続できません。\n" + e1, ui.ButtonSet.OK);
-    return;
+    Logger.log(e1);
+    fit365OpAlertError_();
   }
-  ui.alert(
-    "➊ 初回権限",
-    "承認ダイアログが出ていたら完了まで進めてください。\n続けて 「❷初回権限」を押してください。",
-    ui.ButtonSet.OK
-  );
 }
 
 /** メニュー: 各店の「【店名】YY年M月」シートで 6行目→全店、月次なら SMS（DL 取込＋日付→チェック） */
@@ -237,17 +246,22 @@ function fit365SyncTestFromMenu_() {
   ui.alert("同期テスト（各店→全店）", row6 + "\n" + sms, ui.ButtonSet.OK);
 }
 
-function fit365AuthStep2() {
+function fit365AuthStep2Core_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var ui = SpreadsheetApp.getUi();
   fit365EnsureControlSheet_(ss);
-  var createdS = installFit365StoreHubCheckboxSyncTrigger();
-  ui.alert(
-    "❷ 初回権限",
-    (createdS ? "各店→全店: トリガーを作成しました。" : "各店→全店: トリガーは既にあります。") +
-      "\n6行目のチェックに加え、SMS は P4〜P7（実施日）→全店チェック。DL（Q4〜Q7）は全店 2 行目 K〜N のみ。",
-    ui.ButtonSet.OK
-  );
+  removeFit365MonthlyGenponTrigger();
+  installFit365MonthlyGenponTriggerSilent_();
+  installFit365StoreHubCheckboxSyncTrigger();
+}
+
+function fit365AuthStep2() {
+  try {
+    fit365AuthStep2Core_();
+    fit365OpAlertDone_();
+  } catch (e2) {
+    Logger.log(e2);
+    fit365OpAlertError_();
+  }
 }
 
 /**
@@ -428,8 +442,9 @@ function clearFit365DataColumns(sheet, dataStartRow, lastRow, colIndices, clearV
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu("FIT365 各店（請求・同期）")
-    .addItem("【初回】全店同期セットアップ（➊＋❷）", "fit365StoreHubSyncOneTimeSetup")
+    .addItem("初回セットアップ", "fit365InitialStoreSetup")
     .addSeparator()
+    .addItem("📅 当月シートを手動作成", "fit365MonthlyCreateSheetFromGenponManual")
     .addItem("📩 入金データを更新する", "updateFit365Payments")
     .addItem("📥 SMSリストをCSV保存", "downloadSmsCsv")
     .addItem("📄 未納者データ自動生成 (2CSV)", "showImportDialog")
@@ -553,7 +568,7 @@ function fit365RunMonthlyGenponCopy(runDate, options) {
   var genpon = ss.getSheetByName(FIT365_GENPON_SHEET_NAME);
   if (!genpon) {
     var msg = "コピー元シート「" + FIT365_GENPON_SHEET_NAME + "」が見つかりません。";
-    if (!silent) SpreadsheetApp.getUi().alert(msg);
+    if (!silent) throw new Error(msg);
     return msg;
   }
 
@@ -566,19 +581,30 @@ function fit365RunMonthlyGenponCopy(runDate, options) {
       "店舗名を決められません。先月分のシート名「【店舗】" +
       fit365FormatYearMonthLabel(prevEx.year, prevEx.month) +
       "」に一致するものを用意するか、【店舗】YY年M月 形式のシートを1つ以上置いてください。";
-    if (!silent) SpreadsheetApp.getUi().alert(msg2);
+    if (!silent) throw new Error(msg2);
     return msg2;
   }
 
   var newName = storeBracket + targetLabel;
-  if (ss.getSheetByName(newName)) {
-    var skipMsg = "シート「" + newName + "」は既にあるため作成をスキップしました。";
-    if (!silent) SpreadsheetApp.getUi().alert(skipMsg);
+  var existingSheet = ss.getSheetByName(newName);
+  if (existingSheet) {
+    var wasHidden = existingSheet.isSheetHidden();
+    if (wasHidden) {
+      existingSheet.showSheet();
+    }
+    var skipMsg = wasHidden
+      ? "シート「" + newName + "」は既にありました（非表示だったため表示しました）。"
+      : "シート「" + newName + "」は既にあるため作成をスキップしました。";
+    if (silent) Logger.log(skipMsg);
     return skipMsg;
   }
 
   var newSheet = genpon.copyTo(ss);
   newSheet.setName(newName);
+  // コピー元「原本」が非表示だと複製も非表示になるため、必ず表示する
+  if (newSheet.isSheetHidden()) {
+    newSheet.showSheet();
+  }
 
   var allSheets = ss.getSheets();
   var genponIdx = -1;
@@ -597,20 +623,39 @@ function fit365RunMonthlyGenponCopy(runDate, options) {
   }
 
   var okMsg = "シート「" + newName + "」を「" + FIT365_GENPON_SHEET_NAME + "」から作成しました。";
-  if (!silent) SpreadsheetApp.getUi().alert(okMsg);
+  if (silent) Logger.log(okMsg);
   return okMsg;
 }
 
-/** メニューから手動実行（UI あり） */
+/** メニューから手動実行 */
 function fit365MonthlyCreateSheetFromGenponManual() {
-  fit365RunMonthlyGenponCopy(new Date(), { silent: false });
+  try {
+    fit365RunMonthlyGenponCopy(new Date(), { silent: true });
+    fit365OpAlertDone_();
+  } catch (e) {
+    Logger.log(e);
+    fit365OpAlertError_();
+  }
 }
 
 /**
- * 毎月1日 午前6時（スクリプトのタイムゾーン）に原本から当月シートを作成
+ * 月次の時間トリガーを削除（正規＋誤って付いた Manual 用の両方）
  */
-function installFit365MonthlyGenponTrigger() {
-  removeFit365MonthlyGenponTrigger();
+function removeFit365MonthlyGenponTrigger() {
+  var handlers = [FIT365_MONTHLY_GENPON_HANDLER, FIT365_MONTHLY_GENPON_HANDLER_MANUAL];
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = triggers.length - 1; i >= 0; i--) {
+    if (handlers.indexOf(triggers[i].getHandlerFunction()) !== -1) {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+}
+
+/**
+ * 毎月1日 6:10 に原本から当月シートを作成する時間トリガー（UI なし関数のみ）
+ * @returns {boolean} 新規作成したとき true
+ */
+function installFit365MonthlyGenponTriggerSilent_() {
   ScriptApp.newTrigger(FIT365_MONTHLY_GENPON_HANDLER)
     .timeBased()
     .onMonthDay(1)
@@ -618,29 +663,44 @@ function installFit365MonthlyGenponTrigger() {
     .nearMinute(10)
     .inTimezone(Session.getScriptTimeZone())
     .create();
-  SpreadsheetApp.getUi().alert(
-    "設定しました: 毎月1日 6:10（タイムゾーン " +
-      Session.getScriptTimeZone() +
-      "）に「" +
-      FIT365_GENPON_SHEET_NAME +
-      "」から当月シートを作成します。"
-  );
+  return true;
 }
 
-function removeFit365MonthlyGenponTrigger() {
-  var triggers = ScriptApp.getProjectTriggers();
-  for (var i = 0; i < triggers.length; i++) {
-    if (triggers[i].getHandlerFunction() === FIT365_MONTHLY_GENPON_HANDLER) {
-      ScriptApp.deleteTrigger(triggers[i]);
-    }
+/**
+ * 毎月1日 午前6時（スクリプトのタイムゾーン）に原本から当月シートを作成
+ */
+function installFit365MonthlyGenponTrigger() {
+  removeFit365MonthlyGenponTrigger();
+  installFit365MonthlyGenponTriggerSilent_();
+  fit365OpAlertDone_();
+}
+
+/**
+ * 時間トリガーから呼ばれる（UI なし・ポップアップなし）
+ */
+function fit365MonthlyCreateSheetFromGenpon() {
+  try {
+    return fit365RunMonthlyGenponCopy(new Date(), { silent: true });
+  } catch (e) {
+    Logger.log("fit365MonthlyCreateSheetFromGenpon: " + e);
+    throw e;
   }
 }
 
 /**
- * 時間トリガーから呼ばれる（UI なし）
+ * Code.gs 貼り直し後: 月次（時間）と onEdit を正しい状態に直す（各店8件などに実行）
  */
-function fit365MonthlyCreateSheetFromGenpon() {
-  fit365RunMonthlyGenponCopy(new Date(), { silent: true });
+function fit365ReinstallStoreTriggers() {
+  try {
+    removeFit365MonthlyGenponTrigger();
+    removeFit365StoreHubOnEditTriggers_();
+    installFit365MonthlyGenponTriggerSilent_();
+    installFit365StoreHubCheckboxSyncTrigger();
+    fit365OpAlertDone_();
+  } catch (e) {
+    Logger.log(e);
+    fit365OpAlertError_();
+  }
 }
 
 /**
@@ -1560,12 +1620,23 @@ function fit365StoreHubPushSmsFromActiveSheet() {
 }
 
 /**
- * 【各店ブックで初回のみ】権限承認 → 全店ブック接続確認 → 6行目の反映テスト → onEdit トリガー作成。
- * メニュー「【初回】全店同期セットアップ」から実行するか、実行ドロップダウンでこの名前を選んで実行。
+ * 【各店・初回1回】全店ブック接続の権限確認 ＋ 月次・編集のトリガー設定。
+ * メニュー「初回セットアップ」から実行。
  */
+function fit365InitialStoreSetup() {
+  try {
+    fit365AuthStep1Core_();
+    fit365AuthStep2Core_();
+    fit365OpAlertDone_();
+  } catch (e) {
+    Logger.log(e);
+    fit365OpAlertError_();
+  }
+}
+
+/** 旧メニュー名との互換（実行ドロップダウン用） */
 function fit365StoreHubSyncOneTimeSetup() {
-  fit365AuthStep1();
-  fit365AuthStep2();
+  fit365InitialStoreSetup();
 }
 
 /**
@@ -1642,18 +1713,24 @@ function fit365FindHubRowByStoreName_(hubSheet, storeName) {
   return -1;
 }
 
+/** onEdit 同期トリガーをすべて削除（重複解消用） */
+function removeFit365StoreHubOnEditTriggers_() {
+  var fn = "fit365StoreHubCheckboxSyncOnEdit";
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = triggers.length - 1; i >= 0; i--) {
+    if (triggers[i].getHandlerFunction() === fn) {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+}
+
 /**
- * fit365StoreHubCheckboxSyncOnEdit 用のインストール型 onEdit を1つ作成する（管理者向け）
- * @returns {boolean} 新規作成したとき true、既にあったとき false
+ * fit365StoreHubCheckboxSyncOnEdit 用の onEdit トリガーを1本だけ作成する
+ * @returns {boolean} 常に新規作成したとき true
  */
 function installFit365StoreHubCheckboxSyncTrigger() {
   var fn = "fit365StoreHubCheckboxSyncOnEdit";
-  var sid = SpreadsheetApp.getActiveSpreadsheet().getId();
-  var triggers = ScriptApp.getProjectTriggers();
-  for (var i = 0; i < triggers.length; i++) {
-    if (triggers[i].getHandlerFunction() !== fn) continue;
-    if (triggers[i].getTriggerSourceId() === sid) return false;
-  }
+  removeFit365StoreHubOnEditTriggers_();
   ScriptApp.newTrigger(fn)
     .forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet())
     .onEdit()
