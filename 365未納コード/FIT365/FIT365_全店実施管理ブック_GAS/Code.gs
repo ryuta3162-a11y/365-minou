@@ -200,6 +200,20 @@ function fit365MarkHubEchoOnStore_(storeSS) {
   storeSS.getSheetByName(FIT365_SYNC_CONTROL_SHEET_NAME).getRange(1, 1).setValue("HUB_ECHO|" + Date.now());
 }
 
+/** 各店→全店の書き込み直後（全店 onEdit のループ防止） */
+function fit365MarkStoreEchoOnHub_(hubSS, hubRow) {
+  fit365EnsureControlSheet_(hubSS);
+  hubSS.getSheetByName(FIT365_SYNC_CONTROL_SHEET_NAME).getRange(1, 1).setValue("STORE_ECHO|" + hubRow + "|" + Date.now());
+}
+
+function fit365HubOpAlertDone_() {
+  SpreadsheetApp.getUi().alert("完了しました", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function fit365HubOpAlertError_() {
+  SpreadsheetApp.getUi().alert("エラー", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
 function fit365LoadStoreIdMap_(hubSS) {
   var out = {};
   var sheet = fit365FindStoreBookMapSheet_(hubSS);
@@ -258,66 +272,201 @@ function fit365WarmOpenStoreMapsForAuth_(hubSS) {
 
 function onOpen() {
   SpreadsheetApp.getUi()
-    .createMenu("FIT365 全店→各店")
-    .addItem("【初回】全店同期セットアップ（➊＋❷）", "fit365HubSyncOneTimeSetup")
+    .createMenu("FIT365 全店")
+    .addItem("初回セットアップ", "fit365HubInitialSetup")
+    .addItem("更新", "fit365HubDataUpdateMenu_")
     .addSeparator()
-    .addItem("同期テスト（選択行→各店6行目）", "fit365SyncTestFromMenu_")
-    .addItem("SMS: 全店2行目K〜N（DL）→各店Q4〜Q7", "fit365HubSmsPushFromMenu_")
-    .addSeparator()
-    .addItem("リマインド送信（本日・手動）", "fit365ReminderRunManualToday")
-    .addItem("リマインド日次トリガー設定", "installFit365ReminderDailyTrigger")
+    .addItem("リマインド送信", "fit365ReminderRunManualToday")
+    .addItem("リマインド自動設定", "fit365HubReminderSetupMenu_")
     .addToUi();
 }
 
-function fit365HubSyncOneTimeSetup() {
-  fit365AuthStep1();
-  fit365AuthStep2();
-}
-
-function fit365AuthStep1() {
+function fit365HubAuthCore_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var ui = SpreadsheetApp.getUi();
   if (ss.getId() !== FIT365_STORE_HUB_SPREADSHEET_ID) {
-    ui.alert("➊", "このスクリプトは全店ブック専用です。", ui.ButtonSet.OK);
-    return;
+    throw new Error("全店ブック専用");
   }
   fit365EnsureControlSheet_(ss);
   fit365EnsureStoreBookMapTemplate_(ss);
   fit365WarmOpenStoreMapsForAuth_(ss);
-  ui.alert("➊ 初回権限", "承認後、「❷初回権限」を押してください。", ui.ButtonSet.OK);
+  removeFit365HubOnEditTriggers_();
+  installFit365HubToStoreRow6CheckboxSyncTrigger();
 }
 
-function fit365AuthStep2() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var ui = SpreadsheetApp.getUi();
-  if (ss.getId() !== FIT365_STORE_HUB_SPREADSHEET_ID) return;
-  fit365EnsureControlSheet_(ss);
-  var created = installFit365HubToStoreRow6CheckboxSyncTrigger();
-  var mapObj = fit365LoadStoreIdMap_(ss);
-  var cnt = 0;
-  for (var kk in mapObj) if (mapObj.hasOwnProperty(kk)) cnt++;
-  ui.alert(
-    "❷ 初回権限",
-    (created ? "全店→各店トリガーを作成しました。" : "トリガーは既にあります。") +
-      "\n店舗マップ: " +
-      cnt +
-      " 件\n各店側も ➊→❷ でトリガー。SMS の DL は全店 2 行目 K〜N→各店 Q4〜Q7。各店の P は実施日→全店チェック。",
-    ui.ButtonSet.OK
-  );
+/** 初回1回：権限・店舗ブック接続・編集時トリガー */
+function fit365HubInitialSetup() {
+  try {
+    fit365HubAuthCore_();
+    fit365HubOpAlertDone_();
+  } catch (e) {
+    Logger.log(e);
+    fit365HubOpAlertError_();
+  }
 }
 
-function fit365SyncTestFromMenu_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var ui = SpreadsheetApp.getUi();
-  var sh = ss.getActiveSheet();
-  var row = ss.getActiveRange().getRow();
-  ui.alert("同期テスト（全店→各店）", fit365HubToStoreSyncRow6AllForHubRow_(sh, row), ui.ButtonSet.OK);
+function fit365HubSyncOneTimeSetup() {
+  fit365HubInitialSetup();
 }
 
-function fit365HubSmsPushFromMenu_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var ui = SpreadsheetApp.getUi();
-  ui.alert("SMS（全店→各店）", fit365HubSmsScheduleRowToAllStores_(ss.getActiveSheet()), ui.ButtonSet.OK);
+/**
+ * 1店舗分：各店シートの6行目チェック・SMS実施日 → 全店の該当行（C〜K, K〜N）
+ * @returns {boolean} 反映できたとき true
+ */
+function fit365HubPullFromStoreForRow_(hubSheet, hitRow) {
+  var storeNameCell = hubSheet.getRange(hitRow, FIT365_STORE_HUB_TARGET_STORE_COL);
+  var storeName = String(storeNameCell.getDisplayValue() || "").trim();
+  storeName = storeName.replace(/^[「『【](.+)[」』】]$/, "$1").trim();
+  if (!storeName) return false;
+
+  var hubSS = hubSheet.getParent();
+  var storeId = fit365ResolveStoreSpreadsheetId_(hubSS, storeName);
+  if (!storeId) {
+    Logger.log("店舗ブック未登録: " + storeName);
+    return false;
+  }
+  var storeSS;
+  try {
+    storeSS = SpreadsheetApp.openById(storeId);
+  } catch (eOpen) {
+    Logger.log("各店ブックを開けません: " + storeName + " " + eOpen);
+    return false;
+  }
+  var storeSh = fit365GetStoreSheetForHubTab_(storeSS, hubSheet.getName(), storeName);
+  if (!storeSh) {
+    Logger.log("各店シートなし: " + storeName + " / " + hubSheet.getName());
+    return false;
+  }
+
+  var r = FIT365_STORE_HUB_SOURCE_ROW;
+  var be = storeSh.getRange(r, 2, r, 5).getValues()[0];
+  var gk = storeSh.getRange(r, 7, r, 11).getValues()[0];
+  var hubCkRange = hubSheet.getRange("C" + hitRow + ":K" + hitRow);
+  var hubRowVals = hubCkRange.getValues()[0];
+  var changed = false;
+  var j;
+  for (j = 0; j < 4; j++) {
+    var v = be[j];
+    if (v !== true && v !== false) continue;
+    if (hubRowVals[j] !== v) {
+      hubRowVals[j] = v;
+      changed = true;
+    }
+  }
+  var k;
+  for (k = 0; k < 5; k++) {
+    var v2 = gk[k];
+    if (v2 !== true && v2 !== false) continue;
+    if (hubRowVals[4 + k] !== v2) {
+      hubRowVals[4 + k] = v2;
+      changed = true;
+    }
+  }
+  if (changed) {
+    fit365MarkStoreEchoOnHub_(hubSS, hitRow);
+    hubCkRange.setValues([hubRowVals]);
+    var chkRule = SpreadsheetApp.newDataValidation().requireCheckbox().setAllowInvalid(false).build();
+    hubCkRange.setDataValidation(chkRule);
+  }
+
+  var dateBlock = storeSh.getRange(fit365SmsStorePBlockA1_()).getValues();
+  var hubSmsChk = hubSheet.getRange(fit365SmsHubStoreCheckboxRangeA1_(hitRow)).getValues()[0];
+  var chkChanged = false;
+  var i;
+  for (i = 0; i < 4; i++) {
+    var dayNum = fit365ParseSmsDayNumber_(dateBlock[i][0]);
+    var want = dayNum !== null;
+    var curCb = fit365CoerceCheckboxValue_(hubSmsChk[i]);
+    var curBool = curCb === null ? false : curCb;
+    if (curBool !== want) {
+      hubSmsChk[i] = want;
+      chkChanged = true;
+    }
+  }
+  if (chkChanged) {
+    fit365MarkStoreEchoOnHub_(hubSS, hitRow);
+    var smsChkRng = hubSheet.getRange(fit365SmsHubStoreCheckboxRangeA1_(hitRow));
+    smsChkRng.setValues([hubSmsChk]);
+    var chkRule2 = SpreadsheetApp.newDataValidation().requireCheckbox().setAllowInvalid(false).build();
+    smsChkRng.setDataValidation(chkRule2);
+  }
+
+  return changed || chkChanged;
+}
+
+/**
+ * 月初作業用：表示中の月次シート（26年6月 等）で
+ * ①各店→全店（チェック・SMS実施状況の取り込み）
+ * ②全店→各店（2行目のSMS日程 DL を各店へ配信）
+ */
+function fit365HubDataUpdateMenu_() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss.getId() !== FIT365_STORE_HUB_SPREADSHEET_ID) {
+      throw new Error("全店ブック専用");
+    }
+    var hubSheet = ss.getActiveSheet();
+    if (!fit365ReminderParseMonthSheetName_(hubSheet.getName())) {
+      throw new Error("月次シート（YY年M月）を開いて実行してください");
+    }
+    var last = hubSheet.getLastRow();
+    if (last < FIT365_STORE_HUB_TARGET_SCAN_MIN_ROW) {
+      throw new Error("店舗行がありません");
+    }
+    var ok = 0;
+    var row;
+    for (row = FIT365_STORE_HUB_TARGET_SCAN_MIN_ROW; row <= last; row++) {
+      var nm = String(hubSheet.getRange(row, FIT365_STORE_HUB_TARGET_STORE_COL).getDisplayValue() || "").trim();
+      if (!nm) continue;
+      if (fit365HubPullFromStoreForRow_(hubSheet, row)) ok++;
+    }
+    var smsMsg = fit365HubSmsScheduleRowToAllStores_(hubSheet);
+    Logger.log("データ更新: 取込 " + ok + " 店 / SMS配信 " + smsMsg);
+    if (String(smsMsg).indexOf("OK:") !== 0) {
+      throw new Error(smsMsg);
+    }
+    fit365HubOpAlertDone_();
+  } catch (e) {
+    Logger.log(e);
+    fit365HubOpAlertError_();
+  }
+}
+
+/** 旧メニュー名との互換 */
+function fit365HubPullAllStoresMenu_() {
+  fit365HubDataUpdateMenu_();
+}
+
+/** リマインド担当者が1回：送信権限の確認＋毎朝の自動送信トリガー（メールは送らない） */
+function fit365HubReminderSetupMenu_() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss.getId() !== FIT365_STORE_HUB_SPREADSHEET_ID) {
+      throw new Error("全店ブック専用");
+    }
+    var contact = ss.getSheetByName("連絡先") || ss.getSheetByName(FIT365_REMINDER_CONTACT_SHEET_NAME_TEST);
+    if (contact) contact.getLastRow();
+    MailApp.getRemainingDailyQuota();
+    removeFit365HubReminderTriggers_();
+    installFit365ReminderDailyTrigger();
+    fit365HubOpAlertDone_();
+  } catch (e) {
+    Logger.log(e);
+    fit365HubOpAlertError_();
+  }
+}
+
+function fit365HubInstallReminderTriggerMenu_() {
+  fit365HubReminderSetupMenu_();
+}
+
+function removeFit365HubReminderTriggers_() {
+  var fn = "fit365ReminderDailyTrigger";
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = triggers.length - 1; i >= 0; i--) {
+    if (triggers[i].getHandlerFunction() === fn) {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
 }
 
 /** 全店 2 行目 K〜N（DL）→店舗ブックに登録された全店の Q4:Q7 */
@@ -500,16 +649,22 @@ function fit365HubToStorePushFromActiveHubRow() {
   SpreadsheetApp.getUi().alert(fit365HubToStoreSyncRow6AllForHubRow_(ss.getActiveSheet(), row));
 }
 
+function removeFit365HubOnEditTriggers_() {
+  var fn = "fit365HubToStoreRow6CheckboxSyncOnEdit";
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = triggers.length - 1; i >= 0; i--) {
+    if (triggers[i].getHandlerFunction() === fn) {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+}
+
 function installFit365HubToStoreRow6CheckboxSyncTrigger() {
   var fn = "fit365HubToStoreRow6CheckboxSyncOnEdit";
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var hubId = FIT365_STORE_HUB_SPREADSHEET_ID;
   if (ss.getId() !== hubId) return false;
-  var triggers = ScriptApp.getProjectTriggers();
-  for (var i = 0; i < triggers.length; i++) {
-    if (triggers[i].getHandlerFunction() !== fn) continue;
-    if (triggers[i].getTriggerSourceId() === hubId) return false;
-  }
+  removeFit365HubOnEditTriggers_();
   ScriptApp.newTrigger(fn).forSpreadsheet(ss).onEdit().create();
   return true;
 }
@@ -880,17 +1035,28 @@ function fit365SendReminderEmailsForToday_(opt) {
 }
 
 function fit365ReminderRunManualToday() {
-  SpreadsheetApp.getUi().alert("リマインド送信", fit365SendReminderEmailsForToday_(new Date()), SpreadsheetApp.getUi().ButtonSet.OK);
+  try {
+    fit365SendReminderEmailsForToday_(new Date());
+    fit365HubOpAlertDone_();
+  } catch (e) {
+    Logger.log(e);
+    fit365HubOpAlertError_();
+  }
 }
 
 function fit365ReminderRunManualTestAllTimings() {
-  var msg = fit365SendReminderEmailsForToday_({
-    today: new Date(),
-    forceTimings: ["2日前", "前日", "当日"],
-    ignoreLog: true,
-    subjectPrefix: "【テスト送信】"
-  });
-  SpreadsheetApp.getUi().alert("リマインド送信（テスト）", msg, SpreadsheetApp.getUi().ButtonSet.OK);
+  try {
+    fit365SendReminderEmailsForToday_({
+      today: new Date(),
+      forceTimings: ["2日前", "前日", "当日"],
+      ignoreLog: true,
+      subjectPrefix: "【テスト送信】"
+    });
+    fit365HubOpAlertDone_();
+  } catch (e) {
+    Logger.log(e);
+    fit365HubOpAlertError_();
+  }
 }
 
 function fit365ReminderDailyTrigger() {
@@ -902,10 +1068,7 @@ function installFit365ReminderDailyTrigger() {
   var fn = "fit365ReminderDailyTrigger";
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   if (ss.getId() !== FIT365_STORE_HUB_SPREADSHEET_ID) return false;
-  var triggers = ScriptApp.getProjectTriggers();
-  for (var i = 0; i < triggers.length; i++) {
-    if (triggers[i].getHandlerFunction() === fn && triggers[i].getTriggerSourceId() === ss.getId()) return false;
-  }
+  removeFit365HubReminderTriggers_();
   ScriptApp.newTrigger(fn)
     .forSpreadsheet(ss)
     .timeBased()
