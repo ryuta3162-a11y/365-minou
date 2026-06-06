@@ -137,6 +137,25 @@ function fit365SyncToast_(ss, title, msg) {
   }
 }
 
+/** 全店ブック未共有などで出るが、別トリガーで同期済みのときは画面通知だけ抑える */
+function fit365IsDocumentPermissionError_(errOrMsg) {
+  var s =
+    errOrMsg && errOrMsg.message ? String(errOrMsg.message) : String(errOrMsg || "");
+  return (
+    s.indexOf("アクセスする権限がありません") !== -1 ||
+    s.indexOf("permission to access") !== -1 ||
+    s.indexOf("Authorization is required") !== -1
+  );
+}
+
+function fit365StoreHubNotifySyncIssue_(ss, title, errOrMsg) {
+  var msg =
+    errOrMsg && errOrMsg.message ? String(errOrMsg.message) : String(errOrMsg || "");
+  Logger.log(String(title || "FIT365各店") + ": " + msg);
+  if (fit365IsDocumentPermissionError_(msg)) return;
+  fit365SyncToast_(ss, title, msg);
+}
+
 function fit365EnsureControlSheet_(ss) {
   var name = FIT365_SYNC_CONTROL_SHEET_NAME;
   var sh = ss.getSheetByName(name);
@@ -1658,7 +1677,7 @@ function fit365StoreHubCheckboxSyncOnEdit(e) {
       try {
         var rDl = fit365StoreSmsRefreshDlFromHub_(sheet);
         if (String(rDl).indexOf("OK:") !== 0) {
-          fit365SyncToast_(ss, "FIT365 SMS", rDl);
+          fit365StoreHubNotifySyncIssue_(ss, "FIT365 SMS", rDl);
         } else {
           fit365SyncToast_(
             ss,
@@ -1669,17 +1688,17 @@ function fit365StoreHubCheckboxSyncOnEdit(e) {
           );
         }
       } catch (errDl) {
-        fit365SyncToast_(ss, "FIT365 SMS", String(errDl));
-        Logger.log(errDl);
+        fit365StoreHubNotifySyncIssue_(ss, "FIT365 SMS", errDl);
       }
       return;
     }
     try {
       var msgSms = fit365StoreHubSyncSmsToHub_(sheet);
-      if (String(msgSms).indexOf("OK:") !== 0) fit365SyncToast_(ss, "各店→全店 SMS", msgSms);
+      if (String(msgSms).indexOf("OK:") !== 0) {
+        fit365StoreHubNotifySyncIssue_(ss, "各店→全店 SMS", msgSms);
+      }
     } catch (errSms) {
-      fit365SyncToast_(ss, "各店→全店 SMS エラー", String(errSms));
-      Logger.log(errSms);
+      fit365StoreHubNotifySyncIssue_(ss, "各店→全店 SMS エラー", errSms);
     }
     return;
   }
@@ -1689,10 +1708,9 @@ function fit365StoreHubCheckboxSyncOnEdit(e) {
   if (!fit365IsLikelyCheckboxEdit_(vRaw)) return;
   try {
     var msg = fit365StoreHubSyncRow6All_(sheet);
-    if (String(msg).indexOf("OK:") !== 0) fit365SyncToast_(ss, "各店→全店", msg);
+    if (String(msg).indexOf("OK:") !== 0) fit365StoreHubNotifySyncIssue_(ss, "各店→全店", msg);
   } catch (err) {
-    fit365SyncToast_(ss, "各店→全店 エラー", String(err));
-    Logger.log(err);
+    fit365StoreHubNotifySyncIssue_(ss, "各店→全店 エラー", err);
   }
 }
 

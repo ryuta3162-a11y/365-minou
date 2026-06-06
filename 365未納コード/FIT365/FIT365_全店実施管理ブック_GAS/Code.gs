@@ -3,7 +3,7 @@
  *
  * 【貼る場所】全店・実施管理ブック 1冊だけ → 拡張機能 → Apps Script → Code.gs 全文置換
  * 【ツールバー】シート上段のカスタムメニュー「FIT365 全店」（onOpen で作成）
- *   成功時: 初回セットアップ / 更新 / リマインド送信 / リマインド自動設定
+ *   成功時: 初回セットアップ / 更新 / リマインド送信（毎日の送信は手動）
  *   古い表示「FIT365 全店→各店」→ このファイルが Google 上で未保存、または別ブックを編集
  *
  * - 店舗行のチェック → 各店6行目へ同期
@@ -14,9 +14,6 @@
  *
  * 各店は FIT365/Code.gs。ループ防止: _FIT365_SYNC（A1=店舗行エコー、B1=DL行エコー予備）
  */
-
-/** 貼付確認用（メニュー「スクリプト版確認」に表示） */
-var FIT365_HUB_TOOLBAR_MENU_VERSION = "2026-06-hub-yellow3-red-v1";
 
 var FIT365_STORE_HUB_SPREADSHEET_ID = "1jyeP8hZYLICEuZEQktwwDUqGgaatuQok69gC3vd0KDc";
 var FIT365_HUB_TO_STORE_ROW6_SYNC_ENABLED = true;
@@ -39,6 +36,7 @@ var FIT365_SMS_STORE_COL_DL = 17;   // Q列: DL
 
 /** リマインドメール設定 */
 var FIT365_REMINDER_ENABLED = true;
+var FIT365_REMINDER_CONTACT_SHEET_NAME = "連絡先";
 var FIT365_REMINDER_CONTACT_SHEET_NAME_TEST = "連絡先サンプル";
 var FIT365_REMINDER_LOG_SHEET_NAME = "_FIT365_REMINDER_LOG";
 var FIT365_REMINDER_DAY_ROW = 2;
@@ -305,9 +303,6 @@ function fit365HubBuildToolbarMenu_() {
     .addItem("更新", "fit365HubDataUpdateMenu_")
     .addSeparator()
     .addItem("リマインド送信", "fit365ReminderRunManualToday")
-    .addItem("リマインド自動設定", "fit365HubReminderSetupMenu_")
-    .addSeparator()
-    .addItem("スクリプト版確認", "fit365HubShowToolbarVersion_")
     .addToUi();
 }
 
@@ -317,15 +312,6 @@ function fit365HubBuildToolbarMenu_() {
  */
 function fit365HubRebuildToolbarMenu() {
   fit365HubBuildToolbarMenu_();
-}
-
-function fit365HubShowToolbarVersion_() {
-  SpreadsheetApp.getUi().alert(
-    "FIT365 全店（ツールバー）\n\n" +
-      "スクリプト版: " + FIT365_HUB_TOOLBAR_MENU_VERSION + "\n\n" +
-      "メニュー名が「FIT365 全店」なら最新です。\n" +
-      "「FIT365 全店→各店」のままなら、Code.gs がこの版に置き換わっていません。"
-  );
 }
 
 function fit365HubAuthCore_() {
@@ -770,8 +756,14 @@ function fit365HubIsTaskColumn_(hubSheet, col) {
   return false;
 }
 
-/** 2行目の日付＋シート名の年月から締切日（日付のみ） */
+/**
+ * 2行目の日付＋シート名の年月から締切日（日付のみ）
+ * 「31日～翌月1日」（26年6月シート→締切6/1・期間は前月31～当月1）は monthEndToFirst
+ */
 function fit365HubTaskDueDate_(hubSheet, sheetInfo, task) {
+  if (task.monthEndToFirst) {
+    return new Date(sheetInfo.fullYear, sheetInfo.month - 1, 1);
+  }
   if (task.sameDayOnly) {
     var header = String(hubSheet.getRange(FIT365_REMINDER_DAY_ROW, task.col).getDisplayValue() || "");
     if (header.indexOf("翌月") !== -1) {
@@ -825,8 +817,8 @@ function fit365HubRefreshTaskColorsForRow_(hubSheet, row, today) {
   var sheetInfo = fit365ReminderParseMonthSheetName_(hubSheet.getName());
   if (!sheetInfo) return 0;
   if (row < FIT365_REMINDER_STORE_START_ROW) return 0;
-  var storeName = String(hubSheet.getRange(row, FIT365_REMINDER_STORE_COL).getDisplayValue() || "").trim();
-  if (!storeName) return 0;
+  var storeName = fit365NormalizeStoreName_(hubSheet.getRange(row, FIT365_REMINDER_STORE_COL).getDisplayValue());
+  if (!fit365HubIsReminderStoreRow_(storeName)) return 0;
   var tasks = fit365ReminderExtractTaskColumns_(hubSheet);
   if (!tasks.length) return 0;
   var todayDate = today instanceof Date ? today : new Date();
@@ -895,17 +887,20 @@ function fit365ReminderParseDayCell_(vRaw) {
   if (vRaw === null || vRaw === undefined || vRaw === "") return null;
   if (typeof vRaw === "number" && !isNaN(vRaw)) {
     var dayNum = Math.floor(Math.abs(vRaw));
-    if (dayNum >= 1 && dayNum <= 31) return { day: dayNum, sameDayOnly: false };
+    if (dayNum >= 1 && dayNum <= 31) {
+      return { day: dayNum, sameDayOnly: false, monthEndToFirst: false };
+    }
     return null;
   }
   var s = String(vRaw).trim();
   if (!s) return null;
-  var sameDayOnly = s.indexOf("翌月1日") !== -1;
+  var monthEndToFirst = /31/.test(s) && s.indexOf("翌月") !== -1;
+  var sameDayOnly = !monthEndToFirst && s.indexOf("翌月1日") !== -1;
   var m = s.match(/(\d{1,2})/g);
   if (!m || m.length === 0) return null;
-  var pick = sameDayOnly ? 1 : parseInt(m[m.length - 1], 10);
+  var pick = monthEndToFirst || sameDayOnly ? 1 : parseInt(m[m.length - 1], 10);
   if (isNaN(pick) || pick < 1 || pick > 31) return null;
-  return { day: pick, sameDayOnly: sameDayOnly };
+  return { day: pick, sameDayOnly: sameDayOnly, monthEndToFirst: monthEndToFirst };
 }
 
 function fit365ReminderExtractTaskColumns_(sheet) {
@@ -923,6 +918,7 @@ function fit365ReminderExtractTaskColumns_(sheet) {
       col: c,
       day: dayInfo.day,
       sameDayOnly: dayInfo.sameDayOnly,
+      monthEndToFirst: !!dayInfo.monthEndToFirst,
       taskName: taskName
     });
   }
@@ -960,6 +956,7 @@ function fit365ReminderSelectDueTasks_(hubSheet, sheetInfo, tasks, today) {
  */
 function fit365ReminderCollectPendingForRow_(tableRow, tasks, hubSheet, sheetInfo, today, ctx) {
   var pending = [];
+  var skippedLog = 0;
   var sheetName = ctx.sheetName;
   var storeName = ctx.storeName;
   var logged = ctx.logged || {};
@@ -978,7 +975,10 @@ function fit365ReminderCollectPendingForRow_(tableRow, tasks, hubSheet, sheetInf
     var isDone = val === true || String(val).toUpperCase() === "TRUE";
     if (isDone) continue;
     var key = [sheetName, storeName, task.taskName, timing].join("|");
-    if (logged[key]) continue;
+    if (logged[key]) {
+      skippedLog++;
+      continue;
+    }
     pending.push({
       taskName: task.taskName,
       day: task.day,
@@ -987,7 +987,7 @@ function fit365ReminderCollectPendingForRow_(tableRow, tasks, hubSheet, sheetInf
       col: task.col
     });
   }
-  return pending;
+  return { pending: pending, skippedLog: skippedLog };
 }
 
 function fit365ReminderTimingLabel_(timing) {
@@ -1008,8 +1008,33 @@ function fit365ReminderSelectForcedTasks_(tasks, forcedTimings) {
   return out;
 }
 
+function fit365ReminderContactSheetHasEmails_(sh) {
+  if (!sh) return false;
+  var last = sh.getLastRow();
+  if (last < 2) return false;
+  var width = FIT365_REMINDER_CONTACT_MAIL_COL_LAST;
+  var vals = sh.getRange(2, FIT365_REMINDER_CONTACT_MAIL_COL_FIRST, last - 1, width).getDisplayValues();
+  for (var i = 0; i < vals.length; i++) {
+    for (var c = 0; c < vals[i].length; c++) {
+      if (fit365ReminderParseEmails_(vals[i][c]).length) return true;
+    }
+  }
+  return false;
+}
+
+/** 本番「連絡先」を優先。C〜Fにメールが無いときのみ「連絡先サンプル」 */
 function fit365ReminderFindContactSheet_(ss) {
-  return ss.getSheetByName("連絡先") || ss.getSheetByName(FIT365_REMINDER_CONTACT_SHEET_NAME_TEST);
+  var prod = ss.getSheetByName(FIT365_REMINDER_CONTACT_SHEET_NAME);
+  var sample = ss.getSheetByName(FIT365_REMINDER_CONTACT_SHEET_NAME_TEST);
+  if (prod && fit365ReminderContactSheetHasEmails_(prod)) return prod;
+  if (sample && fit365ReminderContactSheetHasEmails_(sample)) return sample;
+  return prod || sample;
+}
+
+function fit365HubIsReminderStoreRow_(storeName) {
+  if (!storeName) return false;
+  if (storeName === "実施率") return false;
+  return true;
 }
 
 function fit365ReminderParseEmails_(raw) {
@@ -1198,7 +1223,13 @@ function fit365SendReminderEmailsForToday_(opt) {
 
   var contactSh = fit365ReminderFindContactSheet_(ss);
   if (!contactSh) {
-    return "「連絡先」または「" + FIT365_REMINDER_CONTACT_SHEET_NAME_TEST + "」シートがありません。";
+    return (
+      "「" +
+        FIT365_REMINDER_CONTACT_SHEET_NAME +
+        "」または「" +
+        FIT365_REMINDER_CONTACT_SHEET_NAME_TEST +
+        "」シートがありません。"
+    );
   }
 
   var manualSend = !!options.manualSend;
@@ -1221,7 +1252,7 @@ function fit365SendReminderEmailsForToday_(opt) {
   for (var r = 0; r < table.length; r++) {
     var storeRaw = table[r][FIT365_REMINDER_STORE_COL - 1];
     var storeName = fit365NormalizeStoreName_(storeRaw);
-    if (!storeName) continue;
+    if (!fit365HubIsReminderStoreRow_(storeName)) continue;
     var recipients = contactMap[storeName];
     if (!recipients || !recipients.length) {
       skippedNoMail.push(storeName);
@@ -1253,12 +1284,14 @@ function fit365SendReminderEmailsForToday_(opt) {
         });
       }
     } else {
-      pending = fit365ReminderCollectPendingForRow_(table[r], tasks, targetSheet, sheetInfo, today, {
+      var collected = fit365ReminderCollectPendingForRow_(table[r], tasks, targetSheet, sheetInfo, today, {
         sheetName: sheetLabel,
         storeName: storeName,
         logged: logged,
         allowedTimings: allowedTimings
       });
+      pending = collected.pending;
+      skippedAlreadySent += collected.skippedLog;
     }
 
     if (!pending.length) continue;
@@ -1295,13 +1328,26 @@ function fit365SendReminderEmailsForToday_(opt) {
   }
   if (sentStores > 0) {
     lines.push("送信: " + sentStores + "店舗 / " + sentTasks + "タスク");
+  } else if (skippedAlreadySent > 0) {
+    lines.push(
+      "送信: 0件（リマインド対象 " +
+        skippedAlreadySent +
+        "件を検出したが、本日すでに送信済みのため再送しませんでした）"
+    );
+    lines.push(
+      "※再送テスト: 非表示シート「" +
+        FIT365_REMINDER_LOG_SHEET_NAME +
+        "」の今日の行を削除してから再実行"
+    );
   } else {
-    lines.push("送信: 0件（未チェックの該当タスクなし、または本日送信済み）");
+    lines.push(
+      "送信: 0件（黄の未チェック該当なし／赤のみ＝超過は送信しない／宛先なし）"
+    );
   }
   if (skippedNoMail.length) {
     lines.push("宛先なし（連絡先に店舗名・メール未登録）: " + skippedNoMail.join(", "));
   }
-  if (skippedAlreadySent > 0) {
+  if (sentStores > 0 && skippedAlreadySent > 0) {
     lines.push("本日送信済みでスキップ: " + skippedAlreadySent + "件");
   }
   lines.push(
